@@ -1,0 +1,319 @@
+import { useEffect, useRef, useState } from "react";
+import { InputText } from "primereact/inputtext";
+import { InputNumber } from "primereact/inputnumber";
+import { Dropdown } from "primereact/dropdown";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { useAuth } from "../../context/AuthContext";
+import { useStore } from "../../context/StoreContext";
+import { useToast } from "../../context/ToastContext";
+import { productsApi, categoriesApi, customersApi, salesApi } from "../../services/resources";
+import { apiErrorMessage } from "../../services/api";
+import { formatCurrency } from "../../utils/format";
+import ReceiptDialog from "../../components/ReceiptDialog";
+
+const PAYMENT_METHODS = [
+  { label: "Cash", value: "CASH" },
+  { label: "Mobile Money", value: "MOBILE_MONEY" },
+  { label: "Card", value: "CARD" },
+  { label: "Bank Transfer", value: "BANK_TRANSFER" },
+  { label: "Other", value: "OTHER" },
+];
+
+export default function NewSalePage() {
+  const { user } = useAuth();
+  const { currentStoreId, isAllStores } = useStore();
+  const toast = useToast();
+  const currency = user.organization?.currency || "GHS";
+  const taxRate = user.organization?.taxRate || 0;
+  const canDiscount = user.role === "ADMIN" || user.role === "MANAGER";
+
+  const [search, setSearch] = useState("");
+  const [categoryId, setCategoryId] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
+  const [cart, setCart] = useState([]);
+  const [discount, setDiscount] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState("CASH");
+
+  const [customers, setCustomers] = useState([]);
+  const [customerId, setCustomerId] = useState(null);
+  const [showNewCustomer, setShowNewCustomer] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({ name: "", phone: "", email: "" });
+
+  const [completing, setCompleting] = useState(false);
+  const [completedSale, setCompletedSale] = useState(null);
+  const [checkoutVisible, setCheckoutVisible] = useState(false);
+  const searchRef = useRef(null);
+  const checkoutRef = useRef(null);
+
+  // Hide the floating mobile cart bar once the real Complete Sale button scrolls into
+  // view — otherwise it sits on top of it and blocks the one button that matters most.
+  useEffect(() => {
+    if (!checkoutRef.current) return;
+    const observer = new IntersectionObserver(([entry]) => setCheckoutVisible(entry.isIntersecting), { threshold: 0.1 });
+    observer.observe(checkoutRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    categoriesApi.list().then(({ data }) => setCategories(data.data));
+  }, []);
+
+  useEffect(() => {
+    if (!currentStoreId) return;
+    customersApi.list({ storeId: currentStoreId, pageSize: 100 }).then(({ data }) => setCustomers(data.data));
+  }, [currentStoreId]);
+
+  useEffect(() => {
+    if (!currentStoreId) return;
+    setLoadingProducts(true);
+    const handle = setTimeout(() => {
+      productsApi
+        .list({ storeId: currentStoreId, search: search || undefined, categoryId: categoryId || undefined, active: true, pageSize: 60 })
+        .then(({ data }) => setProducts(data.data))
+        .finally(() => setLoadingProducts(false));
+    }, 250);
+    return () => clearTimeout(handle);
+  }, [currentStoreId, search, categoryId]);
+
+  function addToCart(product) {
+    if (product.stock <= 0) {
+      toast.warn(`${product.name} is out of stock at this store`);
+      return;
+    }
+    setCart((prev) => {
+      const existing = prev.find((i) => i.productId === product.id);
+      if (existing) {
+        if (existing.quantity >= product.stock) {
+          toast.warn(`Only ${product.stock} ${product.unit}(s) of ${product.name} available`);
+          return prev;
+        }
+        return prev.map((i) => (i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i));
+      }
+      return [...prev, { productId: product.id, name: product.name, unit: product.unit, unitPrice: Number(product.sellingPrice), quantity: 1, stock: product.stock }];
+    });
+  }
+
+  function updateQuantity(productId, quantity) {
+    setCart((prev) =>
+      prev.map((i) => {
+        if (i.productId !== productId) return i;
+        const qty = Math.max(1, Math.min(quantity || 1, i.stock));
+        return { ...i, quantity: qty };
+      })
+    );
+  }
+
+  function removeFromCart(productId) {
+    setCart((prev) => prev.filter((i) => i.productId !== productId));
+  }
+
+  function handleSearchKeyDown(e) {
+    if (e.key === "Enter" && products.length === 1) {
+      addToCart(products[0]);
+      setSearch("");
+    }
+  }
+
+  const subtotal = cart.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
+  const taxableAmount = Math.max(subtotal - discount, 0);
+  const tax = taxableAmount * (taxRate / 100);
+  const total = taxableAmount + tax;
+
+  async function handleCreateCustomer() {
+    try {
+      const { data } = await customersApi.create({ ...newCustomer, storeId: currentStoreId });
+      setCustomers((prev) => [...prev, data.data]);
+      setCustomerId(data.data.id);
+      setShowNewCustomer(false);
+      setNewCustomer({ name: "", phone: "", email: "" });
+      toast.success("Customer added");
+    } catch (err) {
+      toast.error(apiErrorMessage(err, "Could not add customer"));
+    }
+  }
+
+  async function handleCompleteSale() {
+    if (!cart.length) {
+      toast.warn("Add at least one product to the cart");
+      return;
+    }
+    setCompleting(true);
+    try {
+      const { data } = await salesApi.create({
+        storeId: currentStoreId,
+        customerId: customerId || undefined,
+        items: cart.map((i) => ({ productId: i.productId, quantity: i.quantity, unitPrice: i.unitPrice, discount: 0 })),
+        discount,
+        paymentMethod,
+      });
+      toast.success(`Sale completed - ${data.data.receiptNumber}`);
+      setCompletedSale(data.data);
+      setCart([]);
+      setDiscount(0);
+      setCustomerId(null);
+      setPaymentMethod("CASH");
+    } catch (err) {
+      toast.error(apiErrorMessage(err, "Could not complete the sale"));
+    } finally {
+      setCompleting(false);
+    }
+  }
+
+  if (isAllStores) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-xl p-10 text-center text-gray-500">
+        <i className="pi pi-info-circle text-2xl mb-2 block" />
+        Select a specific store from the top bar to start a new sale.
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 h-full">
+      <div className="xl:col-span-2 flex flex-col min-h-0">
+        <div className="flex gap-2 mb-3">
+          <span className="p-input-icon-left flex-1">
+            <i className="pi pi-search" />
+            <InputText
+              ref={searchRef}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              placeholder="Search by name, SKU, or scan barcode..."
+              className="w-full"
+            />
+          </span>
+          <Dropdown optionValue="value"
+            value={categoryId}
+            options={[{ label: "All Categories", value: null }, ...categories.map((c) => ({ label: c.name, value: c.id }))]}
+            onChange={(e) => setCategoryId(e.value)}
+            className="w-48"
+          />
+        </div>
+
+        <div className="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 content-start pb-20 xl:pb-0">
+          {loadingProducts && <p className="col-span-full text-center text-gray-400 py-10">Loading products...</p>}
+          {!loadingProducts && products.length === 0 && <p className="col-span-full text-center text-gray-400 py-10">No products found</p>}
+          {products.map((product) => (
+            <button
+              key={product.id}
+              onClick={() => addToCart(product)}
+              disabled={product.stock <= 0}
+              className="bg-white border border-gray-200 rounded-xl p-3 text-left hover:border-blue-400 hover:shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <p className="font-medium text-gray-900 text-sm leading-tight truncate">{product.name}</p>
+              <p className="text-xs text-gray-400 mt-0.5">{product.category?.name || "Uncategorized"}</p>
+              <div className="flex items-center justify-between mt-2">
+                <span className="font-semibold text-blue-600 text-sm">{formatCurrency(product.sellingPrice, currency)}</span>
+                <span className={`text-xs px-1.5 py-0.5 rounded ${product.stock <= 0 ? "bg-red-50 text-red-500" : product.lowStock ? "bg-amber-50 text-amber-600" : "bg-gray-100 text-gray-500"}`}>
+                  {product.stock} {product.unit}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-xl flex flex-col min-h-0">
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex items-center gap-2 mb-2">
+            <Dropdown optionValue="value"
+              value={customerId}
+              options={customers.map((c) => ({ label: c.name, value: c.id }))}
+              onChange={(e) => setCustomerId(e.value)}
+              placeholder="Walk-in customer"
+              showClear
+              filter
+              className="flex-1"
+            />
+            <Button icon="pi pi-plus" outlined onClick={() => setShowNewCustomer(true)} />
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
+          {cart.length === 0 && <p className="text-center text-gray-400 text-sm py-10">Cart is empty</p>}
+          {cart.map((item) => (
+            <div key={item.productId} className="p-3 flex items-center gap-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-800 truncate">{item.name}</p>
+                <p className="text-xs text-gray-400">{formatCurrency(item.unitPrice, currency)} / {item.unit}</p>
+              </div>
+              <InputNumber value={item.quantity} onValueChange={(e) => updateQuantity(item.productId, e.value)} showButtons buttonLayout="horizontal" min={1} max={item.stock} className="w-28" inputClassName="w-10 text-center" decrementButtonClassName="p-button-text" incrementButtonClassName="p-button-text" />
+              <span className="text-sm font-semibold text-gray-900 w-20 text-right">{formatCurrency(item.unitPrice * item.quantity, currency)}</span>
+              <button onClick={() => removeFromCart(item.productId)} className="text-gray-300 hover:text-red-500">
+                <i className="pi pi-trash text-sm" />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="p-4 border-t border-gray-100 space-y-2">
+          {canDiscount && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500">Discount</span>
+              <InputNumber value={discount} onValueChange={(e) => setDiscount(e.value || 0)} mode="decimal" minFractionDigits={2} min={0} className="w-32" inputClassName="text-right" />
+            </div>
+          )}
+          <div className="flex items-center justify-between text-sm text-gray-500">
+            <span>Subtotal</span>
+            <span>{formatCurrency(subtotal, currency)}</span>
+          </div>
+          {taxRate > 0 && (
+            <div className="flex items-center justify-between text-sm text-gray-500">
+              <span>Tax ({taxRate}%)</span>
+              <span>{formatCurrency(tax, currency)}</span>
+            </div>
+          )}
+          <div className="flex items-center justify-between text-lg font-bold text-gray-900 pt-1">
+            <span>Total</span>
+            <span>{formatCurrency(total, currency)}</span>
+          </div>
+
+          <Dropdown optionValue="value" value={paymentMethod} options={PAYMENT_METHODS} onChange={(e) => setPaymentMethod(e.value)} className="w-full mt-2" />
+
+          <div ref={checkoutRef}>
+            <Button
+              label="Complete Sale"
+              icon="pi pi-check"
+              className="w-full mt-2"
+              severity="success"
+              loading={completing}
+              disabled={cart.length === 0}
+              onClick={handleCompleteSale}
+            />
+          </div>
+        </div>
+      </div>
+
+      {cart.length > 0 && !checkoutVisible && (
+        <button
+          onClick={() => checkoutRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
+          className="xl:hidden fixed bottom-20 left-4 right-4 z-30 bg-blue-600 text-white rounded-xl shadow-lg px-4 py-3 flex items-center justify-between"
+        >
+          <span className="text-sm font-medium">
+            {cart.reduce((n, i) => n + i.quantity, 0)} item{cart.length === 1 ? "" : "s"} in cart
+          </span>
+          <span className="flex items-center gap-2 font-semibold">
+            {formatCurrency(total, currency)}
+            <i className="pi pi-arrow-up" />
+          </span>
+        </button>
+      )}
+
+      <Dialog header="Add Customer" visible={showNewCustomer} onHide={() => setShowNewCustomer(false)} style={{ width: "24rem" }}>
+        <div className="space-y-3">
+          <InputText placeholder="Name" value={newCustomer.name} onChange={(e) => setNewCustomer((c) => ({ ...c, name: e.target.value }))} className="w-full" />
+          <InputText placeholder="Phone" value={newCustomer.phone} onChange={(e) => setNewCustomer((c) => ({ ...c, phone: e.target.value }))} className="w-full" />
+          <InputText placeholder="Email" value={newCustomer.email} onChange={(e) => setNewCustomer((c) => ({ ...c, email: e.target.value }))} className="w-full" />
+          <Button label="Save Customer" className="w-full" onClick={handleCreateCustomer} disabled={!newCustomer.name} />
+        </div>
+      </Dialog>
+
+      <ReceiptDialog sale={completedSale} visible={!!completedSale} onHide={() => setCompletedSale(null)} />
+    </div>
+  );
+}

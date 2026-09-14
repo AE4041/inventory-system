@@ -1,0 +1,193 @@
+@import "tailwindcss";
+@import "primeicons/primeicons.css";
+@import "primereact/resources/themes/tailwind-light/theme.css";
+@import "primereact/resources/primereact.min.css";
+
+:root {
+  color-scheme: light;
+  --brand: #2563eb;
+  --brand-dark: #1d4ed8;
+  --surface-border: #e5e7eb;
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+  --shadow-md: 0 4px 16px -4px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.04);
+  --shadow-lg: 0 12px 32px -8px rgb(15 23 42 / 0.14), 0 4px 8px -4px rgb(15 23 42 / 0.06);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "InterVariable", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background-color: #f4f5f7;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Thin, unobtrusive scrollbars so dense tables/sidebars feel modern rather than cluttered. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* The "tailwind-light" theme correctly loads the real Inter font (the previous theme's
+   font-family name didn't match its own @font-face, so it silently fell back to the system
+   font) — Inter renders noticeably larger than that fallback at the same declared size, and
+   the theme's own padding/font-size scale is tuned for a marketing site, not a dense admin
+   app. Both compound into everything reading as oversized. Dial the whole scale back down. */
+.p-component {
+  font-size: 0.875rem;
+}
+
+.p-inputtext,
+.p-inputnumber-input,
+.p-inputotp-input,
+.p-password-input,
+.p-dropdown .p-dropdown-label,
+.p-multiselect .p-multiselect-label,
+.p-calendar .p-inputtext,
+.p-autocomplete-input {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.p-button {
+  padding: 0.55rem 1rem;
+  font-size: 0.875rem;
+}
+.p-button.p-button-icon-only {
+  padding: 0.55rem;
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item,
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item,
+.p-autocomplete-panel .p-autocomplete-items .p-autocomplete-item {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* Compact PrimeReact DataTable so more rows fit on smaller screens, with a softer feel.
+   Cell content must not wrap — a single long value (a receipt number, a full date/time
+   string) wrapping to 2-3 lines was inflating every row on the page to ~125px tall, which
+   read as "bigger gaps" even though the padding itself was already tight. The table's wrapper
+   div scrolls horizontally (overflow-x-auto) so nothing is lost, it just scrolls sideways
+   instead of stretching vertically. */
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.6rem 0.9rem;
+  font-size: 0.875rem;
+  border-color: #f1f5f9;
+  white-space: nowrap;
+}
+.p-datatable .p-datatable-thead > tr > th {
+  padding: 0.65rem 0.9rem;
+  white-space: nowrap;
+  background: #fafafa;
+  color: #6b7280;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-color: #f1f5f9;
+}
+.p-datatable .p-datatable-tbody > tr {
+  transition: background-color 120ms ease;
+}
+.p-datatable .p-datatable-tbody > tr:hover {
+  background-color: #f8fafc;
+}
+.p-datatable .p-paginator {
+  border: none;
+  background: transparent;
+  padding-top: 0.75rem;
+}
+
+/* Softer, more contemporary elevation + rounding on overlay surfaces. */
+.p-dialog {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.p-dialog .p-dialog-header {
+  padding: 1.25rem 1.5rem 0.75rem;
+}
+.p-dialog .p-dialog-header .p-dialog-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+.p-dialog .p-dialog-content {
+  padding: 0.5rem 1.5rem 1.5rem;
+}
+
+.p-toast .p-toast-message {
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+}
+
+.p-menu,
+.p-tieredmenu {
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  border-color: var(--surface-border);
+  overflow: hidden;
+}
+
+.p-sidebar {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Consistent, calmer focus ring across form controls (matches the brand blue instead of PrimeReact's default). */
+.p-inputtext:enabled:focus,
+.p-dropdown:not(.p-disabled).p-focus,
+.p-multiselect:not(.p-disabled).p-focus,
+.p-calendar.p-focus > .p-inputtext,
+.p-inputnumber-input:enabled:focus {
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 0.15);
+  border-color: var(--brand);
+}
+
+.p-button {
+  border-radius: 9px;
+  transition: filter 120ms ease, transform 80ms ease;
+}
+.p-button:not(.p-disabled):active {
+  transform: translateY(0.5px);
+}
+
+/* Gentle fade/rise so switching pages doesn't feel like a hard cut. */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.page-enter {
+  animation: page-enter 220ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+  }
+}
