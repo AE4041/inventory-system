@@ -39,6 +39,8 @@ router.post("/vouchers/redeemed", authenticateStoreToken, validateBody(voucherRe
 router.post("/vouchers/close-day", authenticateStoreToken, closeStoreDay);
 
 // External-scheduler-facing (e.g. Vercel Cron) — every store, every organization.
+// Vercel Cron invokes scheduled endpoints with GET; POST is kept too for manual/curl testing.
+router.get("/close-day-all", requireCronSecret, closeDayAll);
 router.post("/close-day-all", requireCronSecret, closeDayAll);
 
 // Admin-facing, JWT-authenticated.

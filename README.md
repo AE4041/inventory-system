@@ -164,14 +164,27 @@ and each voucher redemption becomes stock sold.
    Telegram notifications — it just skips that one report and logs a warning.
 
 **How it works:** a redemption is recorded and its stock deducted **immediately** (so "vouchers
-remaining" stays live all day), but the revenue is only booked once — when the *router's own*
-end-of-day script calls the close-day endpoint, all of that store's not-yet-invoiced redemptions
-for the day are rolled into one Sale per plan (`source: MIKROTIK` on the Sale, so it's
-distinguishable from POS sales if needed later). A nightly job in `backend/src/jobs/
-voucherCloseOut.job.js` also runs as a safety net in case the router's own trigger doesn't fire —
-only meaningful if the backend runs as a persistent server (not a serverless deployment); on
-Vercel, wire `POST /api/integrations/mikrotik/close-day-all` (auth: `X-Cron-Secret` header, see
-`CRON_SECRET` in `.env.example`) to Vercel Cron instead.
+remaining" stays live all day), but the revenue is only booked when something calls the close-day
+endpoint — normally the *router's own* end-of-day script, right after it sends its Telegram
+summary. That groups a store's not-yet-invoiced redemptions by **day and plan**, so even if a
+close-day trigger is missed entirely (router power loss, etc.) and redemptions from several
+different days are still pending, a later recovery run produces one correctly-dated Sale per
+missed day instead of merging everything into a single lump under today's date
+(`voucherCloseOut.service.js`).
+
+**Backend-side fallback (doesn't depend on the router at all):** `backend/vercel.json` schedules a
+[Vercel Cron](https://vercel.com/docs/cron-jobs) job that hits `GET /api/integrations/mikrotik/
+close-day-all` once daily (10 minutes after midnight UTC, adjust `crons[0].schedule` if your
+stores are in a very different timezone) — every store's pending redemptions across every
+organization get closed out, whether or not the router's own script fired. Set a `CRON_SECRET` env
+var on the Vercel project (see `.env.example`); Vercel automatically sends
+`Authorization: Bearer <CRON_SECRET>` when it invokes the job, which is what
+`middleware/cronSecret.js` checks (an `X-Cron-Secret` header also works, for manual/curl testing).
+This endpoint is idempotent and safe to call anytime, on top of the router's own trigger — it only
+ever processes redemptions that haven't been booked yet.
+On a persistent (non-serverless) deployment, `backend/src/jobs/voucherCloseOut.job.js` runs the
+same logic in-process instead — only one of the two mechanisms is meaningful depending on how you
+deploy, and it's fine to leave both configured.
 
 **Deliberately not built:** live stock-in tracking from voucher *generation*. That would need
 either editing the generation tool's own source to call this system's API, or a poller reaching

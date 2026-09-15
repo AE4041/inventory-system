@@ -1,4 +1,10 @@
 {
   "version": 2,
-  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }]
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
+  "crons": [
+    {
+      "path": "/api/integrations/mikrotik/close-day-all",
+      "schedule": "10 0 * * *"
+    }
+  ]
 }

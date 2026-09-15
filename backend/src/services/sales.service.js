@@ -20,6 +20,10 @@ export async function createSale({
   // redeemed (see mikrotikIntegration.controller.js) — deducting it again here when rolling
   // those redemptions into a daily Sale would double-count the loss.
   skipInventory = false,
+  // Only used by the voucher close-out's missed-day recovery: backdates the Sale to when
+  // the underlying redemptions actually happened, instead of whenever the recovery run
+  // executes. Omit for a normal sale — Prisma's @default(now()) applies.
+  createdAt,
 }) {
   const productIds = items.map((i) => i.productId);
   // Independent lookups — run concurrently instead of waiting on one, then the other.
@@ -69,6 +73,7 @@ export async function createSale({
         paymentMethod,
         status: "COMPLETED",
         source,
+        ...(createdAt && { createdAt }),
         items: {
           create: lineItems.map(({ productName, ...item }) => item),
         },
