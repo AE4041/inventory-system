@@ -42,7 +42,7 @@ export default function DashboardPage() {
   }, [range, currentStoreId]);
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5 mt-10">
       <PageHeader
         title="Dashboard"
         subtitle="Business performance overview"
