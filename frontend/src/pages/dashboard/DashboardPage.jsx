@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui-compat/Skeleton";
+import { ChartLine, Wallet } from "@primeicons/react";
 import { Line, LineChart, Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Pie, PieChart, Legend } from "recharts";
 import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
@@ -9,6 +10,17 @@ import { useAuth } from "../../context/AuthContext";
 import { dashboardApi } from "../../services/resources";
 import { dateRangeParams, isRangeReady } from "../../utils/dateRange";
 import { formatCurrency } from "../../utils/format";
+
+const RANGE_LABELS = {
+  today: "Today",
+  yesterday: "Yesterday",
+  this_week: "This Week",
+  last_week: "Last Week",
+  this_month: "This Month",
+  last_month: "Last Month",
+  this_year: "This Year",
+  custom: "Custom Range",
+};
 
 const COLORS = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#0ea5e9"];
 
@@ -63,6 +75,53 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div
+              className="lg:col-span-2 relative overflow-hidden rounded-2xl p-6 text-white flex flex-col justify-between min-h-[168px]"
+              style={{ background: "linear-gradient(135deg, #6d5dfb, #4c3fd6)" }}
+            >
+              <div className="absolute -right-10 -top-16 w-56 h-56 rounded-full bg-white/10 pointer-events-none" />
+              <div className="absolute -right-20 -bottom-20 w-64 h-64 rounded-full bg-white/5 pointer-events-none" />
+              <span className="relative inline-flex w-fit items-center gap-1.5 bg-white/15 text-xs font-medium px-3 py-1 rounded-full">
+                {RANGE_LABELS[range.preset] || "This period"}
+              </span>
+              <div className="relative">
+                <h2 className="text-2xl font-semibold">Welcome back, {user.name?.split(" ")[0]}</h2>
+                <p className="text-white/70 text-sm mt-1">{user.organization?.name} — Net revenue {formatCurrency(data.netRevenue, currency)}</p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl p-4 bg-rose-50 flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-rose-700 font-medium">Total Sales</p>
+                <div className="w-9 h-9 rounded-lg bg-white/70 flex items-center justify-center text-rose-500">
+                  <ChartLine className="size-4" />
+                </div>
+              </div>
+              <p className="text-xl font-bold text-gray-900 mt-3">{formatCurrency(data.sales.totalSales, currency)}</p>
+              {data.salesOverTime?.length > 1 && (
+                <div className="h-10 -mx-2 -mb-1 mt-1">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data.salesOverTime}>
+                      <Bar dataKey="total" fill="#fb7185" radius={[2, 2, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-2xl p-4 bg-teal-50 flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-teal-700 font-medium">Net Revenue</p>
+                <div className="w-9 h-9 rounded-lg bg-white/70 flex items-center justify-center text-teal-500">
+                  <Wallet className="size-4" />
+                </div>
+              </div>
+              <p className="text-xl font-bold text-gray-900 mt-3">{formatCurrency(data.netRevenue, currency)}</p>
+              <p className="text-xs text-teal-700/70 mt-1">{data.sales.transactions} transaction{data.sales.transactions === 1 ? "" : "s"}</p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             <StatCard label="Total Sales" value={formatCurrency(data.sales.totalSales, currency)} icon="pi-chart-line" accent="blue" />
             <StatCard label="Total Expenses" value={formatCurrency(data.expenses.totalExpenses, currency)} icon="pi-money-bill" accent="red" />

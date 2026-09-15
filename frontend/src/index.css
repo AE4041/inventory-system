@@ -61,14 +61,11 @@
   --p-text-muted-color: var(--p-surface-500);
   --p-text-hover-muted-color: var(--p-surface-600);
 
-  /* App-only tokens PrimeReact doesn't own — drive the hand-rolled sidebar/topbar
-     directly as Tailwind utilities (bg-sidebar, text-sidebar-fg, etc). The desktop
-     sidebar is plain Tailwind today, not a PrimeReact component, and stays that way. */
-  --color-sidebar: #1a1533;
-  --color-sidebar-hover: #241d47;
-  --color-sidebar-active: #372a6b;
-  --color-sidebar-fg: #e4e0f5;
-  --color-sidebar-fg-muted: #9188b8;
+  /* App-only token PrimeReact doesn't own — drives the hand-rolled sidebar/topbar
+     directly as a Tailwind utility (bg-sidebar). Hover/active states use white/N
+     opacity overlays on top of this flat color rather than separate shade tokens.
+     The desktop sidebar is plain Tailwind today, not a PrimeReact component. */
+  --color-sidebar: #6d5dfb;
   --radius-2xl: 1rem;
   --shadow-card: 0 1px 3px 0 rgb(15 23 42 / 0.06), 0 1px 2px -1px rgb(15 23 42 / 0.04);
 }
@@ -171,10 +168,6 @@ body {
   --p-text-muted-color: var(--p-text-muted-color);
   --p-text-hover-muted-color: var(--p-text-hover-muted-color);
   --color-sidebar: var(--color-sidebar);
-  --color-sidebar-hover: var(--color-sidebar-hover);
-  --color-sidebar-active: var(--color-sidebar-active);
-  --color-sidebar-fg: var(--color-sidebar-fg);
-  --color-sidebar-fg-muted: var(--color-sidebar-fg-muted);
   --radius-2xl: var(--radius-2xl);
   --shadow-card: var(--shadow-card);
 }
