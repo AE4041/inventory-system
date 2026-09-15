@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
+import { Dialog } from "@/components/ui-compat/Dialog";
+import { Button } from "@/components/ui-compat/Button";
+import { InputText } from "@/components/ui/inputtext";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { receiptsApi } from "../services/resources";

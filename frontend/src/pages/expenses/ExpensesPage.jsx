@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
-import { InputNumber } from "primereact/inputnumber";
-import { InputText } from "primereact/inputtext";
-import { InputTextarea } from "primereact/inputtextarea";
-import { Calendar } from "primereact/calendar";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
+import { DataTable } from "@/components/ui-compat/DataTable";
+import { Column } from "@/components/ui-compat/DataTable";
+import { Select as Dropdown } from "@/components/ui-compat/Select";
+import { InputNumber } from "@/components/ui-compat/InputNumber";
+import { InputText } from "@/components/ui/inputtext";
+import { InputTextarea } from "@/components/ui-compat/InputTextarea";
+import { DatePicker as Calendar } from "@/components/ui-compat/DatePicker";
+import { Button } from "@/components/ui-compat/Button";
+import { Dialog } from "@/components/ui-compat/Dialog";
 import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
 import EmptyState from "../../components/EmptyState";
@@ -119,7 +119,7 @@ export default function ExpensesPage() {
         <StatCard label="Total (this filter)" value={formatCurrency(total, currency)} icon="pi-money-bill" accent="red" />
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
         <DataTable
           value={rows.data}
           loading={loading}

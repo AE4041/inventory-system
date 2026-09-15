@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { ToggleButton } from "primereact/togglebutton";
+import { DataTable } from "@/components/ui-compat/DataTable";
+import { Column } from "@/components/ui-compat/DataTable";
+import { InputText } from "@/components/ui/inputtext";
+import { Button } from "@/components/ui-compat/Button";
+import { Dialog } from "@/components/ui-compat/Dialog";
+import { ToggleButton } from "@/components/ui-compat/ToggleButton";
 import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
 import { useStore } from "../../context/StoreContext";
@@ -72,7 +72,7 @@ export default function StoresPage() {
     <div>
       <PageHeader title="Stores" actions={<Button label="Add Store" icon="pi pi-plus" onClick={openCreate} />} />
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
         <DataTable value={stores} emptyMessage={<EmptyState icon="pi-building-columns" title="No stores yet" subtitle="Add your first branch to get started." />}>
           <Column field="name" header="Name" />
           <Column header="Address" body={(s) => s.address || "-"} />

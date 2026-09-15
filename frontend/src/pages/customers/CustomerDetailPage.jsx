@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Button } from "primereact/button";
+import { Spinner } from "@primeicons/react";
+import { DataTable } from "@/components/ui-compat/DataTable";
+import { Column } from "@/components/ui-compat/DataTable";
+import { Button } from "@/components/ui-compat/Button";
 import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
 import ReceiptDialog from "../../components/ReceiptDialog";
@@ -27,7 +28,7 @@ export default function CustomerDetailPage() {
   if (!customer) {
     return (
       <div className="py-20 text-center text-gray-400">
-        <i className="pi pi-spin pi-spinner text-2xl" />
+        <Spinner className="animate-spin size-7" />
       </div>
     );
   }
@@ -50,7 +51,7 @@ export default function CustomerDetailPage() {
       {customer.notes && <p className="text-sm text-gray-500 mb-4">Notes: {customer.notes}</p>}
 
       <h3 className="text-sm font-semibold text-gray-700 mb-2">Purchase History</h3>
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
         <DataTable value={customer.purchaseHistory} paginator rows={10} emptyMessage={<EmptyState icon="pi-shopping-bag" title="No purchases yet" />}>
           <Column field="receiptNumber" header="Receipt #" />
           <Column header="Date" body={(s) => formatDateTime(s.createdAt)} />

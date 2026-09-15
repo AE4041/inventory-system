@@ -1,8 +1,9 @@
+import { Icon } from "@/icons/registry";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import { Password } from "primereact/password";
+import { Button } from "@/components/ui-compat/Button";
+import { InputText } from "@/components/ui/inputtext";
+import { InputPassword as Password } from "@/components/ui-compat/InputPassword";
 import { useAuth } from "../../context/AuthContext";
 import { apiErrorMessage } from "../../services/api";
 import AuthLayout from "../../layouts/AuthLayout";
@@ -37,9 +38,9 @@ export default function RegisterOrgPage() {
       title="Create your business"
       subtitle="Set up your organization and admin account"
       footer={
-        <div className="bg-white rounded-xl border border-gray-200 px-4 py-3 text-center">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-card px-4 py-3 text-center">
           <p className="text-sm text-gray-500">
-            Already have an account? <Link to="/login" className="text-blue-600 font-medium">Sign in</Link>
+            Already have an account? <Link to="/login" className="text-violet-600 font-medium">Sign in</Link>
           </p>
         </div>
       }
@@ -71,7 +72,7 @@ export default function RegisterOrgPage() {
 
         {error && (
           <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 flex items-center gap-2">
-            <i className="pi pi-exclamation-circle" />
+            <Icon className="pi-exclamation-circle" />
             {error}
           </p>
         )}

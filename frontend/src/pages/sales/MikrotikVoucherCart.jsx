@@ -1,11 +1,12 @@
+import { Icon } from "@/icons/registry";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { Dropdown } from "primereact/dropdown";
-import { InputNumber } from "primereact/inputnumber";
-import { InputText } from "primereact/inputtext";
-import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
+import { Button } from "@/components/ui-compat/Button";
+import { Dialog } from "@/components/ui-compat/Dialog";
+import { Select as Dropdown } from "@/components/ui-compat/Select";
+import { InputNumber } from "@/components/ui-compat/InputNumber";
+import { InputText } from "@/components/ui/inputtext";
+import { confirmDialog, ConfirmDialog } from "@/components/ui-compat/confirmDialog";
 import { mikrotikApi } from "../../services/resources";
 import { apiErrorMessage } from "../../services/api";
 import { formatCurrency } from "../../utils/format";
@@ -91,7 +92,7 @@ export default function MikrotikVoucherCart({ storeId, currency }) {
   const items = summary?.items || [];
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl flex flex-col max-w-2xl mx-auto">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-card flex flex-col max-w-2xl mx-auto">
       <ConfirmDialog />
       <div className="p-4 border-b border-gray-100 flex items-center justify-between">
         <div>
@@ -106,7 +107,7 @@ export default function MikrotikVoucherCart({ storeId, currency }) {
 
       {summary?.olderPendingCount > 0 && (
         <div className="mx-4 mt-3 px-3 py-2 bg-amber-50 text-amber-700 text-xs rounded-lg flex items-center gap-2">
-          <i className="pi pi-info-circle" />
+          <Icon className="pi-info-circle" />
           {summary.olderPendingCount} redemption{summary.olderPendingCount === 1 ? "" : "s"} from earlier day(s) are also pending and will be closed out separately.
         </div>
       )}
@@ -123,7 +124,7 @@ export default function MikrotikVoucherCart({ storeId, currency }) {
                 onClick={() => setExpandedProductId(expanded ? null : item.productId)}
                 className="w-full p-3 flex items-center gap-2 text-left hover:bg-gray-50"
               >
-                <i className={`pi ${expanded ? "pi-chevron-down" : "pi-chevron-right"} text-xs text-gray-400`} />
+                <Icon className={`${expanded ? "pi-chevron-down" : "pi-chevron-right"} text-xs text-gray-400`} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-800 truncate">{item.productName}</p>
                   <p className="text-xs text-gray-400">{formatCurrency(item.unitPrice, currency)} each</p>
@@ -138,7 +139,7 @@ export default function MikrotikVoucherCart({ storeId, currency }) {
                       <span className="flex-1 text-gray-600 font-mono">{r.voucherCode || "(manually added)"}</span>
                       <span className="text-gray-400">{formatTime(r.redeemedAt)}</span>
                       <button onClick={() => handleRemove(r, item.productName)} className="text-gray-300 hover:text-red-500">
-                        <i className="pi pi-trash" />
+                        <Icon className="pi-trash" />
                       </button>
                     </div>
                   ))}
@@ -156,7 +157,7 @@ export default function MikrotikVoucherCart({ storeId, currency }) {
         </div>
         <p className="text-xs text-gray-400 text-center pt-1">
           This is a preview only — vouchers are closed out automatically at end of day (router trigger or the daily backup job), or manually from{" "}
-          <Link to="/settings/mikrotik" className="text-blue-600 hover:underline">Settings → MikroTik Integration</Link>.
+          <Link to="/settings/mikrotik" className="text-violet-600 hover:underline">Settings → MikroTik Integration</Link>.
         </p>
       </div>
 

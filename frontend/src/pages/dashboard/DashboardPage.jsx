@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Skeleton } from "primereact/skeleton";
+import { Skeleton } from "@/components/ui-compat/Skeleton";
 import { Line, LineChart, Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Pie, PieChart, Legend } from "recharts";
 import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
@@ -41,7 +41,7 @@ export default function DashboardPage() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-4">
+              <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 flex items-center gap-4">
                 <Skeleton shape="circle" size="2.75rem" />
                 <div className="flex-1">
                   <Skeleton width="70%" height="0.7rem" className="mb-2" />
@@ -51,11 +51,11 @@ export default function DashboardPage() {
             ))}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-4">
+            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-card p-4">
               <Skeleton width="40%" height="0.9rem" className="mb-4" />
               <Skeleton height="240px" borderRadius="12px" />
             </div>
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
               <Skeleton width="60%" height="0.9rem" className="mb-4" />
               <Skeleton height="240px" borderRadius="12px" />
             </div>
@@ -75,7 +75,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-4">
+            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-card p-4">
               <h3 className="text-sm font-semibold text-gray-700 mb-3">Sales Over Time</h3>
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={data.salesOverTime}>
@@ -88,7 +88,7 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
               <h3 className="text-sm font-semibold text-gray-700 mb-3">Sales by Payment Method</h3>
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
@@ -106,7 +106,7 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {data.storeComparison && (
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
                 <h3 className="text-sm font-semibold text-gray-700 mb-3">Store Comparison</h3>
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={data.storeComparison}>
@@ -123,14 +123,14 @@ export default function DashboardPage() {
               </div>
             )}
 
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
               <h3 className="text-sm font-semibold text-gray-700 mb-3">Top Selling Products</h3>
               <div className="divide-y divide-gray-100">
                 {data.topProducts.length === 0 && <p className="text-sm text-gray-400 py-6 text-center">No sales in this period</p>}
                 {data.topProducts.map((p, i) => (
                   <div key={p.productId} className="flex items-center justify-between py-2.5">
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="w-6 h-6 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold flex items-center justify-center shrink-0">
+                      <span className="w-6 h-6 rounded-full bg-violet-50 text-violet-600 text-xs font-semibold flex items-center justify-center shrink-0">
                         {i + 1}
                       </span>
                       <span className="text-sm text-gray-800 truncate">{p.productName}</span>

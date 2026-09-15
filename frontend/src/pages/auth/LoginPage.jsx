@@ -1,8 +1,9 @@
+import { Icon } from "@/icons/registry";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import { Password } from "primereact/password";
+import { Button } from "@/components/ui-compat/Button";
+import { InputText } from "@/components/ui/inputtext";
+import { InputPassword as Password } from "@/components/ui-compat/InputPassword";
 import { useAuth } from "../../context/AuthContext";
 import { apiErrorMessage } from "../../services/api";
 import AuthLayout from "../../layouts/AuthLayout";
@@ -35,9 +36,9 @@ export default function LoginPage() {
       title="Welcome back"
       subtitle="Sign in to manage your stores"
       footer={
-        <div className="bg-white rounded-xl border border-gray-200 px-4 py-3 text-center">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-card px-4 py-3 text-center">
           <p className="text-sm text-gray-500">
-            New business? <Link to="/register" className="text-blue-600 font-medium">Create an account</Link>
+            New business? <Link to="/register" className="text-violet-600 font-medium">Create an account</Link>
           </p>
           <p className="text-xs text-gray-400 mt-2">
             Demo: admin@demo.com &middot; manager@demo.com &middot; cashier@demo.com (password: password123)
@@ -65,7 +66,7 @@ export default function LoginPage() {
 
         {error && (
           <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 flex items-center gap-2">
-            <i className="pi pi-exclamation-circle" />
+            <Icon className="pi-exclamation-circle" />
             {error}
           </p>
         )}

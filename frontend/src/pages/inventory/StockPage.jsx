@@ -1,7 +1,8 @@
+import { Icon } from "@/icons/registry";
 import { useEffect, useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { InputText } from "primereact/inputtext";
+import { DataTable } from "@/components/ui-compat/DataTable";
+import { Column } from "@/components/ui-compat/DataTable";
+import { InputText } from "@/components/ui/inputtext";
 import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
 import EmptyState from "../../components/EmptyState";
@@ -48,13 +49,13 @@ export default function StockPage() {
       )}
 
       <div className="mb-3">
-        <span className="p-input-icon-left w-full sm:w-80 block">
-          <i className="pi pi-search" />
-          <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filter by product name..." className="w-full" />
+        <span className="relative w-full sm:w-80 block">
+          <Icon className="pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 size-3.5" />
+          <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filter by product name..." className="w-full pl-9" />
         </span>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
         <DataTable
           value={filtered}
           loading={loading}

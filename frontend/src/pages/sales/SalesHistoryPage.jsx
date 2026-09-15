@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
-import { Button } from "primereact/button";
-import { confirmDialog } from "primereact/confirmdialog";
-import { ConfirmDialog } from "primereact/confirmdialog";
-import { InputTextarea } from "primereact/inputtextarea";
-import { Dialog } from "primereact/dialog";
+import { DataTable } from "@/components/ui-compat/DataTable";
+import { Column } from "@/components/ui-compat/DataTable";
+import { Select as Dropdown } from "@/components/ui-compat/Select";
+import { Button } from "@/components/ui-compat/Button";
+import { confirmDialog } from "@/components/ui-compat/confirmDialog";
+import { ConfirmDialog } from "@/components/ui-compat/confirmDialog";
+import { InputTextarea } from "@/components/ui-compat/InputTextarea";
+import { Dialog } from "@/components/ui-compat/Dialog";
 import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
 import DateRangeFilter from "../../components/DateRangeFilter";
@@ -105,7 +105,7 @@ export default function SalesHistoryPage({ fixedStatus }) {
         }
       />
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
         <DataTable
           value={rows.data}
           loading={loading}

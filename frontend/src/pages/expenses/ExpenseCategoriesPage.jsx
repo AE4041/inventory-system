@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
+import { DataTable } from "@/components/ui-compat/DataTable";
+import { Column } from "@/components/ui-compat/DataTable";
+import { InputText } from "@/components/ui/inputtext";
+import { Button } from "@/components/ui-compat/Button";
 import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
 import { useToast } from "../../context/ToastContext";
@@ -48,12 +48,12 @@ export default function ExpenseCategoriesPage() {
     <div>
       <PageHeader title="Expense Categories" />
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-5 flex gap-2 max-w-md">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 mb-5 flex gap-2 max-w-md">
         <InputText value={name} onChange={(e) => setName(e.target.value)} placeholder="New category name" className="flex-1" onKeyDown={(e) => e.key === "Enter" && handleAdd()} />
         <Button label="Add" icon="pi pi-plus" loading={saving} onClick={handleAdd} />
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto max-w-md">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto max-w-md">
         <DataTable value={categories} emptyMessage={<EmptyState icon="pi-tags" title="No expense categories yet" />}>
           <Column field="name" header="Name" />
           <Column header="" body={(c) => <Button icon="pi pi-trash" text rounded severity="danger" onClick={() => handleDelete(c)} />} />

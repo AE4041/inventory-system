@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
-import { Button } from "primereact/button";
+import { DataTable } from "@/components/ui-compat/DataTable";
+import { Column } from "@/components/ui-compat/DataTable";
+import { Select as Dropdown } from "@/components/ui-compat/Select";
+import { Button } from "@/components/ui-compat/Button";
 import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
 import EmptyState from "../../components/EmptyState";
@@ -95,7 +95,7 @@ export default function SalesReportPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
         <DataTable value={result?.sales || []} loading={loading} paginator rows={20} emptyMessage={<EmptyState icon="pi-receipt" title="No sales for this filter" />}>
           <Column field="receiptNumber" header="Receipt #" />
           <Column header="Date" body={(s) => formatDateTime(s.createdAt)} />

@@ -1,0 +1,140 @@
+import {
+  ArrowLeft,
+  ArrowRightArrowLeft,
+  ArrowUp,
+  Bars,
+  Box,
+  Building,
+  BuildingColumns,
+  Calculator,
+  Calendar,
+  Check,
+  CheckCircle,
+  ChartBar,
+  ChartLine,
+  ChevronDown,
+  ChevronRight,
+  Cog,
+  Database,
+  Download,
+  Envelope,
+  Eye,
+  EyeSlash,
+  ExclamationCircle,
+  ExclamationTriangle,
+  FilePdf,
+  History,
+  Inbox,
+  InfoCircle,
+  Key,
+  List,
+  MoneyBill,
+  Pencil,
+  Percentage,
+  Plus,
+  Receipt,
+  Refresh,
+  Replay,
+  Search,
+  Send,
+  ShoppingBag,
+  ShoppingCart,
+  SignOut,
+  Sitemap,
+  SlidersH,
+  Spinner,
+  Star,
+  Tag,
+  Tags,
+  ThLarge,
+  Times,
+  TimesCircle,
+  Trash,
+  UserEdit,
+  Users,
+  Wallet,
+  Warehouse,
+  Wifi,
+} from "@primeicons/react";
+
+// Maps a v10-style "pi pi-x" icon-class name to its @primeicons/react component —
+// keeps the icon SET unchanged (PrimeIcons) while moving off CSS-class icons, which
+// have no glyphs to render once the old primeicons.css stylesheet is gone. Extend this
+// as more icon names are needed; an unmapped name renders nothing rather than crashing.
+export const ICON_REGISTRY = {
+  "pi-arrow-left": ArrowLeft,
+  "pi-arrow-right-arrow-left": ArrowRightArrowLeft,
+  "pi-arrow-up": ArrowUp,
+  "pi-bars": Bars,
+  "pi-box": Box,
+  "pi-building": Building,
+  "pi-building-columns": BuildingColumns,
+  "pi-calculator": Calculator,
+  "pi-calendar": Calendar,
+  "pi-chart-bar": ChartBar,
+  "pi-chart-line": ChartLine,
+  "pi-check": Check,
+  "pi-check-circle": CheckCircle,
+  "pi-chevron-down": ChevronDown,
+  "pi-chevron-right": ChevronRight,
+  "pi-cog": Cog,
+  "pi-database": Database,
+  "pi-download": Download,
+  "pi-envelope": Envelope,
+  "pi-eye": Eye,
+  "pi-eye-slash": EyeSlash,
+  "pi-exclamation-circle": ExclamationCircle,
+  "pi-exclamation-triangle": ExclamationTriangle,
+  "pi-file-pdf": FilePdf,
+  "pi-history": History,
+  "pi-inbox": Inbox,
+  "pi-info-circle": InfoCircle,
+  "pi-key": Key,
+  "pi-list": List,
+  "pi-money-bill": MoneyBill,
+  "pi-pencil": Pencil,
+  "pi-percentage": Percentage,
+  "pi-plus": Plus,
+  "pi-receipt": Receipt,
+  "pi-refresh": Refresh,
+  "pi-replay": Replay,
+  "pi-search": Search,
+  "pi-send": Send,
+  "pi-shopping-bag": ShoppingBag,
+  "pi-shopping-cart": ShoppingCart,
+  "pi-sign-out": SignOut,
+  "pi-sitemap": Sitemap,
+  "pi-sliders-h": SlidersH,
+  "pi-spin": Spinner,
+  "pi-spinner": Spinner,
+  "pi-star": Star,
+  "pi-tag": Tag,
+  "pi-tags": Tags,
+  "pi-th-large": ThLarge,
+  "pi-times": Times,
+  "pi-times-circle": TimesCircle,
+  "pi-trash": Trash,
+  "pi-user-edit": UserEdit,
+  "pi-users": Users,
+  "pi-wallet": Wallet,
+  "pi-warehouse": Warehouse,
+  "pi-wifi": Wifi,
+};
+
+// Accepts either "pi pi-x" (v10 class string) or "pi-x" and returns the icon component.
+export function resolveIcon(name) {
+  if (!name) return null;
+  const key = name.trim().split(/\s+/).pop();
+  return ICON_REGISTRY[key] || null;
+}
+
+// Drop-in replacement for `<i className="pi pi-x other-classes" />` — resolves the
+// pi-x icon name via the registry and forwards everything else (className, etc).
+export function Icon({ className, ...rest }) {
+  const names = (className || "").split(/\s+/);
+  const iconName = names.find((n) => n.startsWith("pi-"));
+  const Cmp = resolveIcon(iconName);
+  const extraClass = names.filter((n) => n !== "pi" && n !== iconName).join(" ");
+  if (!Cmp) return null;
+  return <Cmp className={extraClass} {...rest} />;
+}

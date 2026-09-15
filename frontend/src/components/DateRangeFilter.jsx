@@ -1,5 +1,5 @@
-import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
+import { Select as Dropdown } from "@/components/ui-compat/Select";
+import { DatePicker as Calendar } from "@/components/ui-compat/DatePicker";
 
 const PRESETS = [
   { label: "Today", value: "today" },

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { TabView, TabPanel } from "primereact/tabview";
-import { InputText } from "primereact/inputtext";
-import { InputNumber } from "primereact/inputnumber";
-import { Button } from "primereact/button";
+import { Tabs, TabsList, TabsPanel, TabsPanels, TabsTab } from "@/components/ui/tabs";
+import { InputText } from "@/components/ui/inputtext";
+import { InputNumber } from "@/components/ui-compat/InputNumber";
+import { Button } from "@/components/ui-compat/Button";
 import PageHeader from "../../components/PageHeader";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
@@ -43,52 +43,60 @@ export default function SettingsPage() {
     <div>
       <PageHeader title="Settings" />
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 max-w-2xl">
-        <TabView>
-          <TabPanel header="Business Settings">
-            <div className="space-y-4 max-w-sm pt-2">
-              <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">Business Name</label>
-                <InputText value={form.name} onChange={(e) => update("name", e.target.value)} className="w-full" />
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card max-w-2xl overflow-hidden">
+        <Tabs defaultValue="business">
+          <TabsList>
+            <TabsTab value="business">Business Settings</TabsTab>
+            <TabsTab value="tax">Tax Settings</TabsTab>
+            <TabsTab value="receipt">Receipt Settings</TabsTab>
+            <TabsTab value="payment">Payment Methods</TabsTab>
+          </TabsList>
+          <TabsPanels>
+            <TabsPanel value="business">
+              <div className="space-y-4 max-w-sm pt-2">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">Business Name</label>
+                  <InputText value={form.name} onChange={(e) => update("name", e.target.value)} className="w-full" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">Currency Code</label>
+                  <InputText value={form.currency} onChange={(e) => update("currency", e.target.value.toUpperCase())} className="w-full" maxLength={6} />
+                  <p className="text-xs text-gray-400 mt-1">e.g. GHS, USD, NGN, KES</p>
+                </div>
+                <Button label="Save Changes" loading={saving} onClick={handleSave} />
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">Currency Code</label>
-                <InputText value={form.currency} onChange={(e) => update("currency", e.target.value.toUpperCase())} className="w-full" maxLength={6} />
-                <p className="text-xs text-gray-400 mt-1">e.g. GHS, USD, NGN, KES</p>
-              </div>
-              <Button label="Save Changes" loading={saving} onClick={handleSave} />
-            </div>
-          </TabPanel>
+            </TabsPanel>
 
-          <TabPanel header="Tax Settings">
-            <div className="space-y-4 max-w-sm pt-2">
-              <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">Sales Tax Rate (%)</label>
-                <InputNumber value={form.taxRate} onValueChange={(e) => update("taxRate", e.value || 0)} suffix="%" min={0} max={100} className="w-full" />
-                <p className="text-xs text-gray-400 mt-1">Applied automatically to every new sale, after discounts.</p>
+            <TabsPanel value="tax">
+              <div className="space-y-4 max-w-sm pt-2">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">Sales Tax Rate (%)</label>
+                  <InputNumber value={form.taxRate} onValueChange={(e) => update("taxRate", e.value || 0)} suffix="%" min={0} max={100} className="w-full" />
+                  <p className="text-xs text-gray-400 mt-1">Applied automatically to every new sale, after discounts.</p>
+                </div>
+                <Button label="Save Changes" loading={saving} onClick={handleSave} />
               </div>
-              <Button label="Save Changes" loading={saving} onClick={handleSave} />
-            </div>
-          </TabPanel>
+            </TabsPanel>
 
-          <TabPanel header="Receipt Settings">
-            <div className="pt-2 text-sm text-gray-600 space-y-2 max-w-sm">
-              <p>Receipts automatically include your business name, store details, receipt number, items, totals, and payment method.</p>
-              <p>Store contact details (address, phone, email) come from each store's profile under <span className="font-medium">Stores</span>.</p>
-            </div>
-          </TabPanel>
-
-          <TabPanel header="Payment Methods">
-            <div className="pt-2">
-              <p className="text-sm text-gray-600 mb-3">Payment methods available at checkout:</p>
-              <div className="flex flex-wrap gap-2">
-                {PAYMENT_METHODS.map((m) => (
-                  <span key={m} className="text-xs font-medium px-3 py-1.5 rounded-full bg-blue-50 text-blue-600">{m}</span>
-                ))}
+            <TabsPanel value="receipt">
+              <div className="pt-2 text-sm text-gray-600 space-y-2 max-w-sm">
+                <p>Receipts automatically include your business name, store details, receipt number, items, totals, and payment method.</p>
+                <p>Store contact details (address, phone, email) come from each store's profile under <span className="font-medium">Stores</span>.</p>
               </div>
-            </div>
-          </TabPanel>
-        </TabView>
+            </TabsPanel>
+
+            <TabsPanel value="payment">
+              <div className="pt-2">
+                <p className="text-sm text-gray-600 mb-3">Payment methods available at checkout:</p>
+                <div className="flex flex-wrap gap-2">
+                  {PAYMENT_METHODS.map((m) => (
+                    <span key={m} className="text-xs font-medium px-3 py-1.5 rounded-full bg-violet-50 text-violet-600">{m}</span>
+                  ))}
+                </div>
+              </div>
+            </TabsPanel>
+          </TabsPanels>
+        </Tabs>
       </div>
     </div>
   );

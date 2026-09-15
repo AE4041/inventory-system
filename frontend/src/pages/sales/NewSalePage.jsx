@@ -1,9 +1,10 @@
+import { Icon } from "@/icons/registry";
 import { useEffect, useRef, useState } from "react";
-import { InputText } from "primereact/inputtext";
-import { InputNumber } from "primereact/inputnumber";
-import { Dropdown } from "primereact/dropdown";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
+import { InputText } from "@/components/ui/inputtext";
+import { InputNumber } from "@/components/ui-compat/InputNumber";
+import { Select as Dropdown } from "@/components/ui-compat/Select";
+import { Button } from "@/components/ui-compat/Button";
+import { Dialog } from "@/components/ui-compat/Dialog";
 import { useAuth } from "../../context/AuthContext";
 import { useStore } from "../../context/StoreContext";
 import { useToast } from "../../context/ToastContext";
@@ -168,8 +169,8 @@ export default function NewSalePage() {
 
   if (isAllStores) {
     return (
-      <div className="bg-white border border-gray-200 rounded-xl p-10 text-center text-gray-500">
-        <i className="pi pi-info-circle text-2xl mb-2 block" />
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-10 text-center text-gray-500">
+        <Icon className="pi-info-circle text-2xl mb-2 block" />
         Select a specific store from the top bar to start a new sale.
       </div>
     );
@@ -200,15 +201,15 @@ export default function NewSalePage() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 flex-1 min-h-0">
       <div className="xl:col-span-2 flex flex-col min-h-0">
         <div className="flex gap-2 mb-3">
-          <span className="p-input-icon-left flex-1">
-            <i className="pi pi-search" />
+          <span className="relative flex-1">
+            <Icon className="pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 size-3.5" />
             <InputText
               ref={searchRef}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={handleSearchKeyDown}
               placeholder="Search by name, SKU, or scan barcode..."
-              className="w-full"
+              className="w-full pl-9"
             />
           </span>
           <Dropdown optionValue="value"
@@ -227,12 +228,12 @@ export default function NewSalePage() {
               key={product.id}
               onClick={() => addToCart(product)}
               disabled={product.stock <= 0}
-              className="bg-white border border-gray-200 rounded-xl p-3 text-left hover:border-blue-400 hover:shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="bg-white rounded-2xl border border-gray-100 shadow-card p-3 text-left hover:border-violet-300 hover:shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <p className="font-medium text-gray-900 text-sm leading-tight truncate">{product.name}</p>
               <p className="text-xs text-gray-400 mt-0.5">{product.category?.name || "Uncategorized"}</p>
               <div className="flex items-center justify-between mt-2">
-                <span className="font-semibold text-blue-600 text-sm">{formatCurrency(product.sellingPrice, currency)}</span>
+                <span className="font-semibold text-violet-600 text-sm">{formatCurrency(product.sellingPrice, currency)}</span>
                 <span className={`text-xs px-1.5 py-0.5 rounded ${product.stock <= 0 ? "bg-red-50 text-red-500" : product.lowStock ? "bg-amber-50 text-amber-600" : "bg-gray-100 text-gray-500"}`}>
                   {product.stock} {product.unit}
                 </span>
@@ -242,7 +243,7 @@ export default function NewSalePage() {
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl flex flex-col min-h-0">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card flex flex-col min-h-0">
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center gap-2 mb-2">
             <Dropdown optionValue="value"
@@ -266,10 +267,10 @@ export default function NewSalePage() {
                 <p className="text-sm font-medium text-gray-800 truncate">{item.name}</p>
                 <p className="text-xs text-gray-400">{formatCurrency(item.unitPrice, currency)} / {item.unit}</p>
               </div>
-              <InputNumber value={item.quantity} onValueChange={(e) => updateQuantity(item.productId, e.value)} showButtons buttonLayout="horizontal" min={1} max={item.stock} className="w-28" inputClassName="w-10 text-center" decrementButtonClassName="p-button-text" incrementButtonClassName="p-button-text" />
+              <InputNumber value={item.quantity} onValueChange={(e) => updateQuantity(item.productId, e.value)} showButtons buttonLayout="horizontal" min={1} max={item.stock} className="w-28" inputClassName="w-10 text-center" />
               <span className="text-sm font-semibold text-gray-900 w-20 text-right">{formatCurrency(item.unitPrice * item.quantity, currency)}</span>
               <button onClick={() => removeFromCart(item.productId)} className="text-gray-300 hover:text-red-500">
-                <i className="pi pi-trash text-sm" />
+                <Icon className="pi-trash text-sm" />
               </button>
             </div>
           ))}
@@ -316,14 +317,14 @@ export default function NewSalePage() {
       {cart.length > 0 && !checkoutVisible && (
         <button
           onClick={() => checkoutRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
-          className="xl:hidden fixed bottom-20 left-4 right-4 z-30 bg-blue-600 text-white rounded-xl shadow-lg px-4 py-3 flex items-center justify-between"
+          className="xl:hidden fixed bottom-20 left-4 right-4 z-30 bg-violet-600 text-white rounded-xl shadow-lg px-4 py-3 flex items-center justify-between"
         >
           <span className="text-sm font-medium">
             {cart.reduce((n, i) => n + i.quantity, 0)} item{cart.length === 1 ? "" : "s"} in cart
           </span>
           <span className="flex items-center gap-2 font-semibold">
             {formatCurrency(total, currency)}
-            <i className="pi pi-arrow-up" />
+            <Icon className="pi-arrow-up" />
           </span>
         </button>
       )}

@@ -1,16 +1,76 @@
 @import "tailwindcss";
-@import "primeicons/primeicons.css";
-@import "primereact/resources/themes/tailwind-light/theme.css";
-@import "primereact/resources/primereact.min.css";
+@import "tailwindcss-primeui";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
   color-scheme: light;
-  --brand: #2563eb;
-  --brand-dark: #1d4ed8;
+  --brand: #7c3aed;
+  --brand-dark: #6d28d9;
   --surface-border: #e5e7eb;
   --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04);
   --shadow-md: 0 4px 16px -4px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.04);
   --shadow-lg: 0 12px 32px -8px rgb(15 23 42 / 0.14), 0 4px 8px -4px rgb(15 23 42 / 0.06);
+
+  /* Violet primary scale, replacing PrimeReact Tailwind mode's default grayscale
+     "primary-noir" preset — every PrimeReact component (Button, Select, focus rings,
+     selected states) reads its color from --p-primary-*, so this one scale is the
+     single edit point for the app's accent color. */
+  --p-primary-0: #ffffff;
+  --p-primary-50: #f5f3ff;
+  --p-primary-100: #ede9fe;
+  --p-primary-200: #ddd6fe;
+  --p-primary-300: #c4b5fd;
+  --p-primary-400: #a78bfa;
+  --p-primary-500: #8b5cf6;
+  --p-primary-600: #7c3aed;
+  --p-primary-700: #6d28d9;
+  --p-primary-800: #5b21b6;
+  --p-primary-900: #4c1d95;
+  --p-primary-950: #2e1065;
+  --p-primary-color: var(--p-primary-600);
+  --p-primary-contrast-color: var(--p-surface-0);
+  --p-primary-hover-color: var(--p-primary-700);
+  --p-primary-active-color: var(--p-primary-800);
+
+  /* Surface scale stays light/neutral even though the sidebar goes dark — this drives
+     Dialog/Select-popup/DataTable backgrounds app-wide, not just the sidebar. */
+  --p-surface-0: #ffffff;
+  --p-surface-50: #f8fafc;
+  --p-surface-100: #f1f5f9;
+  --p-surface-200: #e2e8f0;
+  --p-surface-300: #cbd5e1;
+  --p-surface-400: #94a3b8;
+  --p-surface-500: #64748b;
+  --p-surface-600: #475569;
+  --p-surface-700: #334155;
+  --p-surface-800: #1e293b;
+  --p-surface-900: #0f172a;
+  --p-surface-950: #020617;
+
+  --p-content-border-radius: 10px;
+  --p-content-border-color: var(--p-surface-200);
+  --p-content-hover-background: var(--p-surface-100);
+  --p-content-hover-color: var(--p-surface-800);
+  --p-highlight-background: var(--p-primary-50);
+  --p-highlight-color: var(--p-primary-700);
+  --p-highlight-focus-background: var(--p-primary-100);
+  --p-highlight-focus-color: var(--p-primary-800);
+  --p-text-color: var(--p-surface-700);
+  --p-text-hover-color: var(--p-surface-800);
+  --p-text-muted-color: var(--p-surface-500);
+  --p-text-hover-muted-color: var(--p-surface-600);
+
+  /* App-only tokens PrimeReact doesn't own — drive the hand-rolled sidebar/topbar
+     directly as Tailwind utilities (bg-sidebar, text-sidebar-fg, etc). The desktop
+     sidebar is plain Tailwind today, not a PrimeReact component, and stays that way. */
+  --color-sidebar: #1a1533;
+  --color-sidebar-hover: #241d47;
+  --color-sidebar-active: #372a6b;
+  --color-sidebar-fg: #e4e0f5;
+  --color-sidebar-fg-muted: #9188b8;
+  --radius-2xl: 1rem;
+  --shadow-card: 0 1px 3px 0 rgb(15 23 42 / 0.06), 0 1px 2px -1px rgb(15 23 42 / 0.04);
 }
 
 html,
@@ -48,129 +108,6 @@ body {
   background: transparent;
 }
 
-/* The "tailwind-light" theme correctly loads the real Inter font (the previous theme's
-   font-family name didn't match its own @font-face, so it silently fell back to the system
-   font) — Inter renders noticeably larger than that fallback at the same declared size, and
-   the theme's own padding/font-size scale is tuned for a marketing site, not a dense admin
-   app. Both compound into everything reading as oversized. Dial the whole scale back down. */
-.p-component {
-  font-size: 0.875rem;
-}
-
-.p-inputtext,
-.p-inputnumber-input,
-.p-inputotp-input,
-.p-password-input,
-.p-dropdown .p-dropdown-label,
-.p-multiselect .p-multiselect-label,
-.p-calendar .p-inputtext,
-.p-autocomplete-input {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-}
-
-.p-button {
-  padding: 0.55rem 1rem;
-  font-size: 0.875rem;
-}
-.p-button.p-button-icon-only {
-  padding: 0.55rem;
-}
-
-.p-dropdown-panel .p-dropdown-items .p-dropdown-item,
-.p-multiselect-panel .p-multiselect-items .p-multiselect-item,
-.p-autocomplete-panel .p-autocomplete-items .p-autocomplete-item {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-}
-
-/* Compact PrimeReact DataTable so more rows fit on smaller screens, with a softer feel.
-   Cell content must not wrap — a single long value (a receipt number, a full date/time
-   string) wrapping to 2-3 lines was inflating every row on the page to ~125px tall, which
-   read as "bigger gaps" even though the padding itself was already tight. The table's wrapper
-   div scrolls horizontally (overflow-x-auto) so nothing is lost, it just scrolls sideways
-   instead of stretching vertically. */
-.p-datatable .p-datatable-tbody > tr > td {
-  padding: 0.6rem 0.9rem;
-  font-size: 0.875rem;
-  border-color: #f1f5f9;
-  white-space: nowrap;
-}
-.p-datatable .p-datatable-thead > tr > th {
-  padding: 0.65rem 0.9rem;
-  white-space: nowrap;
-  background: #fafafa;
-  color: #6b7280;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  border-color: #f1f5f9;
-}
-.p-datatable .p-datatable-tbody > tr {
-  transition: background-color 120ms ease;
-}
-.p-datatable .p-datatable-tbody > tr:hover {
-  background-color: #f8fafc;
-}
-.p-datatable .p-paginator {
-  border: none;
-  background: transparent;
-  padding-top: 0.75rem;
-}
-
-/* Softer, more contemporary elevation + rounding on overlay surfaces. */
-.p-dialog {
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
-}
-.p-dialog .p-dialog-header {
-  padding: 1.25rem 1.5rem 0.75rem;
-}
-.p-dialog .p-dialog-header .p-dialog-title {
-  font-weight: 600;
-  font-size: 1.05rem;
-}
-.p-dialog .p-dialog-content {
-  padding: 0.5rem 1.5rem 1.5rem;
-}
-
-.p-toast .p-toast-message {
-  border-radius: 12px;
-  box-shadow: var(--shadow-lg);
-}
-
-.p-menu,
-.p-tieredmenu {
-  border-radius: 12px;
-  box-shadow: var(--shadow-lg);
-  border-color: var(--surface-border);
-  overflow: hidden;
-}
-
-.p-sidebar {
-  box-shadow: var(--shadow-lg);
-}
-
-/* Consistent, calmer focus ring across form controls (matches the brand blue instead of PrimeReact's default). */
-.p-inputtext:enabled:focus,
-.p-dropdown:not(.p-disabled).p-focus,
-.p-multiselect:not(.p-disabled).p-focus,
-.p-calendar.p-focus > .p-inputtext,
-.p-inputnumber-input:enabled:focus {
-  box-shadow: 0 0 0 3px rgb(37 99 235 / 0.15);
-  border-color: var(--brand);
-}
-
-.p-button {
-  border-radius: 9px;
-  transition: filter 120ms ease, transform 80ms ease;
-}
-.p-button:not(.p-disabled):active {
-  transform: translateY(0.5px);
-}
-
 /* Gentle fade/rise so switching pages doesn't feel like a hard cut. */
 @keyframes page-enter {
   from {
@@ -189,5 +126,62 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .page-enter {
     animation: none;
+  }
+}
+
+@theme inline {
+  --color-p-primary-0: var(--p-primary-0);
+  --color-p-primary-50: var(--p-primary-50);
+  --color-p-primary-100: var(--p-primary-100);
+  --color-p-primary-200: var(--p-primary-200);
+  --color-p-primary-300: var(--p-primary-300);
+  --color-p-primary-400: var(--p-primary-400);
+  --color-p-primary-500: var(--p-primary-500);
+  --color-p-primary-600: var(--p-primary-600);
+  --color-p-primary-700: var(--p-primary-700);
+  --color-p-primary-800: var(--p-primary-800);
+  --color-p-primary-900: var(--p-primary-900);
+  --color-p-primary-950: var(--p-primary-950);
+  --p-primary-color: var(--p-primary-color);
+  --color-p-surface-0: var(--p-surface-0);
+  --color-p-surface-50: var(--p-surface-50);
+  --color-p-surface-100: var(--p-surface-100);
+  --color-p-surface-200: var(--p-surface-200);
+  --color-p-surface-300: var(--p-surface-300);
+  --color-p-surface-400: var(--p-surface-400);
+  --color-p-surface-500: var(--p-surface-500);
+  --color-p-surface-600: var(--p-surface-600);
+  --color-p-surface-700: var(--p-surface-700);
+  --color-p-surface-800: var(--p-surface-800);
+  --color-p-surface-900: var(--p-surface-900);
+  --color-p-surface-950: var(--p-surface-950);
+  --p-content-border-radius: var(--p-content-border-radius);
+  --p-primary-contrast-color: var(--p-primary-contrast-color);
+  --p-primary-hover-color: var(--p-primary-hover-color);
+  --p-primary-active-color: var(--p-primary-active-color);
+  --p-content-border-color: var(--p-content-border-color);
+  --p-content-hover-background: var(--p-content-hover-background);
+  --p-content-hover-color: var(--p-content-hover-color);
+  --p-highlight-background: var(--p-highlight-background);
+  --p-highlight-color: var(--p-highlight-color);
+  --p-highlight-focus-background: var(--p-highlight-focus-background);
+  --p-highlight-focus-color: var(--p-highlight-focus-color);
+  --p-text-color: var(--p-text-color);
+  --p-text-hover-color: var(--p-text-hover-color);
+  --p-text-muted-color: var(--p-text-muted-color);
+  --p-text-hover-muted-color: var(--p-text-hover-muted-color);
+  --color-sidebar: var(--color-sidebar);
+  --color-sidebar-hover: var(--color-sidebar-hover);
+  --color-sidebar-active: var(--color-sidebar-active);
+  --color-sidebar-fg: var(--color-sidebar-fg);
+  --color-sidebar-fg-muted: var(--color-sidebar-fg-muted);
+  --radius-2xl: var(--radius-2xl);
+  --shadow-card: var(--shadow-card);
+}
+
+@layer base {
+  body {
+    background-color: #f4f5f7;
+    color: var(--p-surface-950);
   }
 }

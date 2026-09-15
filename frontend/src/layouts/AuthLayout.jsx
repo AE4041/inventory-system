@@ -1,3 +1,4 @@
+import { resolveIcon } from "../icons/registry";
 import BrandMark from "../components/BrandMark";
 
 const FEATURES = [
@@ -13,7 +14,7 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
     <div className="min-h-screen flex bg-gray-50">
       <div
         className="hidden lg:flex lg:w-[42%] xl:w-[38%] relative flex-col justify-between p-12 text-white overflow-hidden shrink-0"
-        style={{ background: "linear-gradient(160deg, #4f46e5, #2563eb 60%, #1d4ed8)" }}
+        style={{ background: "linear-gradient(160deg, #7c3aed, #5b21b6 60%, #4c1d95)" }}
       >
         <div
           className="absolute -right-24 -top-24 w-96 h-96 rounded-full pointer-events-none"
@@ -32,14 +33,17 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
         <div className="relative">
           <h2 className="text-3xl font-semibold leading-snug mb-6">Run every branch from one place.</h2>
           <ul className="space-y-4">
-            {FEATURES.map((f) => (
-              <li key={f.text} className="flex items-center gap-3 text-white/90">
-                <span className="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
-                  <i className={`pi ${f.icon} text-sm`} />
-                </span>
-                <span className="text-sm">{f.text}</span>
-              </li>
-            ))}
+            {FEATURES.map((f) => {
+              const Icon = resolveIcon(f.icon);
+              return (
+                <li key={f.text} className="flex items-center gap-3 text-white/90">
+                  <span className="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+                    {Icon && <Icon className="text-sm" />}
+                  </span>
+                  <span className="text-sm">{f.text}</span>
+                </li>
+              );
+            })}
           </ul>
         </div>
 

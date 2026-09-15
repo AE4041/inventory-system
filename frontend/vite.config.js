@@ -1,9 +1,15 @@
+import path from "path";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@": path.resolve(import.meta.dirname, "./src"),
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),
@@ -14,7 +20,7 @@ export default defineConfig({
         name: "Multi-Store Inventory & POS",
         short_name: "InvenPOS",
         description: "Inventory, sales, expenses, and reporting across multiple store branches.",
-        theme_color: "#2563eb",
+        theme_color: "#7c3aed",
         background_color: "#f3f4f6",
         display: "standalone",
         start_url: "/",

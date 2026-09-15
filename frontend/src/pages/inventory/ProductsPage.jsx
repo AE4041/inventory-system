@@ -1,13 +1,14 @@
+import { Icon } from "@/icons/registry";
 import { useEffect, useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import { InputNumber } from "primereact/inputnumber";
-import { Dropdown } from "primereact/dropdown";
-import { InputTextarea } from "primereact/inputtextarea";
-import { Dialog } from "primereact/dialog";
-import { ToggleButton } from "primereact/togglebutton";
+import { DataTable } from "@/components/ui-compat/DataTable";
+import { Column } from "@/components/ui-compat/DataTable";
+import { Button } from "@/components/ui-compat/Button";
+import { InputText } from "@/components/ui/inputtext";
+import { InputNumber } from "@/components/ui-compat/InputNumber";
+import { Select as Dropdown } from "@/components/ui-compat/Select";
+import { InputTextarea } from "@/components/ui-compat/InputTextarea";
+import { Dialog } from "@/components/ui-compat/Dialog";
+import { ToggleButton } from "@/components/ui-compat/ToggleButton";
 import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
 import { useAuth } from "../../context/AuthContext";
@@ -173,13 +174,13 @@ export default function ProductsPage() {
       />
 
       <div className="mb-3">
-        <span className="p-input-icon-left w-full sm:w-80 block">
-          <i className="pi pi-search" />
-          <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..." className="w-full" />
+        <span className="relative w-full sm:w-80 block">
+          <Icon className="pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 size-3.5" />
+          <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..." className="w-full pl-9" />
         </span>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
         <DataTable
           value={products.data}
           loading={loading}

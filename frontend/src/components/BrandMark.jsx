@@ -4,7 +4,7 @@ export default function BrandMark({ size = 32, rounded = "rounded-[28%]" }) {
   return (
     <span
       className={`inline-flex items-center justify-center shrink-0 ${rounded}`}
-      style={{ width: size, height: size, background: "linear-gradient(135deg, #4f46e5, #2563eb)" }}
+      style={{ width: size, height: size, background: "linear-gradient(135deg, #8b5cf6, #6d28d9)" }}
     >
       <svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="none">
         <rect x="3" y="12" width="4" height="9" rx="1" fill="white" />

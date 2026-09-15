@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
-import { InputNumber } from "primereact/inputnumber";
-import { Button } from "primereact/button";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { DataTable } from "@/components/ui-compat/DataTable";
+import { Column } from "@/components/ui-compat/DataTable";
+import { Select as Dropdown } from "@/components/ui-compat/Select";
+import { InputNumber } from "@/components/ui-compat/InputNumber";
+import { Button } from "@/components/ui-compat/Button";
+import { ConfirmDialog, confirmDialog } from "@/components/ui-compat/confirmDialog";
 import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
 import { useStore } from "../../context/StoreContext";
@@ -89,7 +89,7 @@ export default function StockTransfersPage() {
       <ConfirmDialog />
       <PageHeader title="Stock Transfers" subtitle="Move inventory between stores" />
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 mb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
         <div>
           <label className="text-sm font-medium text-gray-700 block mb-1">From Store</label>
           <Dropdown optionValue="value" value={sourceStoreId} options={storeOptions.filter((s) => s.value !== destinationStoreId)} onChange={(e) => setSourceStoreId(e.value)} className="w-full" placeholder="Source" />
@@ -119,7 +119,7 @@ export default function StockTransfersPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
         <DataTable
           value={rows.data}
           loading={loading}

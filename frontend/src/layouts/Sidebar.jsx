@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { resolveIcon } from "@/icons/registry";
 import { NAV_SECTIONS } from "./navConfig";
 
 export default function SidebarNav({ role, onNavigate }) {
@@ -7,7 +8,7 @@ export default function SidebarNav({ role, onNavigate }) {
       {NAV_SECTIONS.filter((section) => !section.roles || section.roles.includes(role)).map((section, idx) => (
         <div key={idx}>
           {section.title && (
-            <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">{section.title}</p>
+            <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-sidebar-fg-muted/70">{section.title}</p>
           )}
           <div className="space-y-0.5">
             {section.items
@@ -20,16 +21,21 @@ export default function SidebarNav({ role, onNavigate }) {
                   onClick={onNavigate}
                   className={({ isActive }) =>
                     `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
-                      isActive ? "bg-blue-50 text-blue-700 font-semibold" : "text-gray-600 hover:bg-gray-100 hover:translate-x-0.5"
+                      isActive
+                        ? "bg-sidebar-active text-white font-semibold shadow-sm"
+                        : "text-sidebar-fg-muted hover:bg-sidebar-hover hover:text-sidebar-fg"
                     }`
                   }
                 >
-                  {({ isActive }) => (
-                    <>
-                      <i className={`pi ${item.icon} text-[15px] ${isActive ? "text-blue-600" : "text-gray-400"}`} />
-                      {item.label}
-                    </>
-                  )}
+                  {({ isActive }) => {
+                    const Icon = resolveIcon(item.icon);
+                    return (
+                      <>
+                        {Icon && <Icon className={isActive ? "text-white" : "text-sidebar-fg-muted"} />}
+                        {item.label}
+                      </>
+                    );
+                  }}
                 </NavLink>
               ))}
           </div>

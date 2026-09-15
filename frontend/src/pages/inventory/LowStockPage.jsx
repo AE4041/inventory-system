@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
+import { DataTable } from "@/components/ui-compat/DataTable";
+import { Column } from "@/components/ui-compat/DataTable";
 import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
 import { useAuth } from "../../context/AuthContext";
@@ -27,7 +27,7 @@ export default function LowStockPage() {
   return (
     <div>
       <PageHeader title="Low Stock" subtitle="Products at or below their minimum stock level" />
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
         <DataTable value={rows.data} loading={loading} paginator rows={20} emptyMessage={<EmptyState icon="pi-check-circle" title="All good — nothing is low on stock" subtitle="Products at or below their minimum level will show up here." />}>
           {isAllStores && <Column header="Store" body={(r) => r.storeName} />}
           <Column header="Product" body={(r) => r.product.name} />

@@ -1,17 +1,20 @@
 import { NavLink } from "react-router-dom";
+import { Bars } from "@primeicons/react";
+import { resolveIcon } from "@/icons/registry";
 
 function TabLink({ to, icon, label, end }) {
+  const Icon = resolveIcon(icon);
   return (
     <NavLink
       to={to}
       end={end}
       className={({ isActive }) =>
         `flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-[11px] font-medium transition-colors ${
-          isActive ? "text-blue-600" : "text-gray-400"
+          isActive ? "text-violet-600" : "text-gray-400"
         }`
       }
     >
-      <i className={`pi ${icon} text-[19px]`} />
+      {Icon && <Icon className="size-4.5" />}
       {label}
     </NavLink>
   );
@@ -32,7 +35,7 @@ export default function MobileBottomNav({ role, onMore }) {
       <TabLink to="/sales" icon="pi-receipt" label="Sales" />
       <TabLink to={fourthTab.to} icon={fourthTab.icon} label={fourthTab.label} />
       <button onClick={onMore} className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-[11px] font-medium text-gray-400">
-        <i className="pi pi-bars text-[19px]" />
+        <Bars className="size-4.5" />
         More
       </button>
     </nav>

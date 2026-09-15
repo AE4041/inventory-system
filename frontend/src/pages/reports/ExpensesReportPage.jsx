@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
-import { Button } from "primereact/button";
+import { DataTable } from "@/components/ui-compat/DataTable";
+import { Column } from "@/components/ui-compat/DataTable";
+import { Select as Dropdown } from "@/components/ui-compat/Select";
+import { Button } from "@/components/ui-compat/Button";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
@@ -65,7 +65,7 @@ export default function ExpensesReportPage() {
             <StatCard label="Number of Expenses" value={result.summary.count} icon="pi-list" accent="gray" />
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-4 mb-5">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 mb-5">
             <h3 className="text-sm font-semibold text-gray-700 mb-3">Expenses by Category</h3>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={result.summary.byCategory}>
@@ -80,7 +80,7 @@ export default function ExpensesReportPage() {
         </>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
         <DataTable value={result?.expenses || []} loading={loading} paginator rows={20} emptyMessage={<EmptyState icon="pi-money-bill" title="No expenses for this filter" />}>
           <Column header="Date" body={(e) => formatDate(e.date)} />
           <Column header="Store" body={(e) => e.store?.name} />

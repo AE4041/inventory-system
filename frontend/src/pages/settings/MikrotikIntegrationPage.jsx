@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { Dropdown } from "primereact/dropdown";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Message } from "primereact/message";
+import { Select as Dropdown } from "@/components/ui-compat/Select";
+import { InputText } from "@/components/ui/inputtext";
+import { Button } from "@/components/ui-compat/Button";
+import { DataTable, Column } from "@/components/ui-compat/DataTable";
+import { Message, MessageContent, MessageText } from "@/components/ui/message";
 import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
 import { useStore } from "../../context/StoreContext";
@@ -106,7 +105,7 @@ export default function MikrotikIntegrationPage() {
     <div className="space-y-6">
       <PageHeader title="MikroTik Voucher Integration" subtitle="Connect each router's hotspot voucher sales to this store's inventory and reports." />
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
         <h3 className="text-sm font-semibold text-gray-700 mb-1">1. Store Token</h3>
         <p className="text-xs text-gray-500 mb-3">Each store/router needs its own token, used by the router's scripts to authenticate with the API.</p>
 
@@ -125,13 +124,17 @@ export default function MikrotikIntegrationPage() {
 
         {newToken && (
           <div className="space-y-2">
-            <Message severity="warn" text="Copy this now — it won't be shown again. Regenerating replaces it and breaks any script still using the old one." className="w-full" />
+            <Message severity="warn" className="w-full">
+              <MessageContent>
+                <MessageText>Copy this now — it won't be shown again. Regenerating replaces it and breaks any script still using the old one.</MessageText>
+              </MessageContent>
+            </Message>
             <InputText value={newToken} readOnly className="w-full font-mono text-xs" onClick={(e) => e.target.select()} />
           </div>
         )}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
         <h3 className="text-sm font-semibold text-gray-700 mb-1">2. Endpoints for your router scripts</h3>
         <p className="text-xs text-gray-500 mb-3">
           Append <code className="bg-gray-100 px-1 rounded">?token=YOUR_STORE_TOKEN</code> to each URL. Replace the domain if this app is deployed somewhere other than where you're viewing it right now.
@@ -142,7 +145,7 @@ export default function MikrotikIntegrationPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-sm font-semibold text-gray-700">3. Profile → Product Mapping</h3>
           <Button label="Close Today's Vouchers Now" icon="pi pi-check-circle" size="small" text loading={closingDay} onClick={handleCloseDayNow} />

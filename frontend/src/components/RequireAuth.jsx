@@ -1,4 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Spinner } from "@primeicons/react";
 import { useAuth } from "../context/AuthContext";
 import BrandMark from "./BrandMark";
 
@@ -10,7 +11,7 @@ export default function RequireAuth() {
     return (
       <div className="h-screen flex flex-col items-center justify-center gap-4 bg-gray-50">
         <BrandMark size={44} />
-        <i className="pi pi-spin pi-spinner text-xl text-gray-300" />
+        <Spinner className="animate-spin size-6 text-gray-300" />
       </div>
     );
   }

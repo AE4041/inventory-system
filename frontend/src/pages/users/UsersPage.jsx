@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { InputText } from "primereact/inputtext";
-import { Password } from "primereact/password";
-import { Dropdown } from "primereact/dropdown";
-import { MultiSelect } from "primereact/multiselect";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
+import { DataTable, Column } from "@/components/ui-compat/DataTable";
+import { InputText } from "@/components/ui/inputtext";
+import { InputPassword as Password } from "@/components/ui-compat/InputPassword";
+import { Select as Dropdown } from "@/components/ui-compat/Select";
+import { Select as MultiSelect } from "@/components/ui-compat/Select";
+import { Button } from "@/components/ui-compat/Button";
+import { Dialog } from "@/components/ui-compat/Dialog";
 import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
 import { useAuth } from "../../context/AuthContext";
@@ -91,11 +90,11 @@ export default function UsersPage() {
     <div>
       <PageHeader title="Users" actions={<Button label="Add User" icon="pi pi-plus" onClick={openCreate} />} />
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
         <DataTable value={users} emptyMessage={<EmptyState icon="pi-user-edit" title="No users yet" />}>
           <Column field="name" header="Name" />
           <Column field="email" header="Email" />
-          <Column header="Role" body={(u) => <span className="text-xs font-medium px-2 py-1 rounded-full bg-blue-50 text-blue-600">{u.role}</span>} />
+          <Column header="Role" body={(u) => <span className="text-xs font-medium px-2 py-1 rounded-full bg-violet-50 text-violet-600">{u.role}</span>} />
           <Column header="Stores" body={(u) => (u.role === "ADMIN" ? "All" : u.storeIds.length)} />
           <Column header="Status" body={(u) => (u.active ? <span className="text-emerald-600 text-xs font-medium">Active</span> : <span className="text-gray-400 text-xs">Inactive</span>)} />
           <Column
@@ -117,13 +116,15 @@ export default function UsersPage() {
           <Password placeholder={editingId ? "New password (leave blank to keep)" : "Password"} value={form.password} onChange={(e) => update("password", e.target.value)} toggleMask className="w-full" inputClassName="w-full" feedback={false} />
           <Dropdown optionValue="value" value={form.role} options={ROLE_OPTIONS} onChange={(e) => update("role", e.value)} className="w-full" />
           {form.role !== "ADMIN" && (
-            <MultiSelect optionValue="value"
+            <MultiSelect
+              multiple
+              optionValue="value"
               value={form.storeIds}
               options={stores.map((s) => ({ label: s.name, value: s.id }))}
               onChange={(e) => update("storeIds", e.value)}
               placeholder="Assign stores"
               className="w-full"
-              display="chip"
+              valueTemplate={() => (form.storeIds?.length ? `${form.storeIds.length} store(s) selected` : null)}
             />
           )}
           <Button label="Save User" className="w-full" loading={saving} onClick={handleSave} disabled={!form.name || !form.email || (!editingId && !form.password)} />
