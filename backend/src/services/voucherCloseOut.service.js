@@ -12,13 +12,15 @@ function dayKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-// Rolls up one store's not-yet-invoiced voucher redemptions into one Sale per (day,
-// product) — normally that's "today's redemptions for this plan", but if a close-day
-// trigger was missed (router power loss, etc.) and redemptions from several different
-// days are still pending, each day gets its own Sale, backdated to when those redemptions
-// actually happened, rather than one Sale merging every pending day together under today's
-// date. Stock was already deducted in real time as each voucher was redeemed, so the sale
-// is created with skipInventory — this only records the revenue, it doesn't touch stock again.
+// Rolls up one store's not-yet-invoiced voucher redemptions into one Sale per day —
+// normally that's "today's redemptions", with one line item per plan sold (2hours,
+// 5hours, etc.) and a single grand total, same as a normal multi-item POS receipt. If a
+// close-day trigger was missed (router power loss, etc.) and redemptions from several
+// different days are still pending, each day still gets its own Sale, backdated to when
+// those redemptions actually happened, rather than one Sale merging every pending day
+// together under today's date. Stock was already deducted in real time as each voucher
+// was redeemed, so the sale is created with skipInventory — this only records the
+// revenue, it doesn't touch stock again.
 export async function closeOutStore(storeId) {
   const store = await prisma.store.findUnique({ where: { id: storeId } });
   if (!store) return { storeId, sales: [] };
@@ -30,31 +32,39 @@ export async function closeOutStore(storeId) {
   });
   if (pending.length === 0) return { storeId, sales: [] };
 
-  const groups = new Map();
+  const dayGroups = new Map();
   for (const redemption of pending) {
-    const key = `${dayKey(redemption.redeemedAt)}::${redemption.productId}`;
-    const group = groups.get(key) ?? { product: redemption.product, redemptionIds: [], lastRedeemedAt: redemption.redeemedAt };
+    const key = dayKey(redemption.redeemedAt);
+    const group = dayGroups.get(key) ?? { redemptionIds: [], lastRedeemedAt: redemption.redeemedAt, byProduct: new Map() };
     group.redemptionIds.push(redemption.id);
     if (redemption.redeemedAt > group.lastRedeemedAt) group.lastRedeemedAt = redemption.redeemedAt;
-    groups.set(key, group);
+
+    const productGroup = group.byProduct.get(redemption.productId) ?? { product: redemption.product, quantity: 0 };
+    productGroup.quantity += 1;
+    group.byProduct.set(redemption.productId, productGroup);
+
+    dayGroups.set(key, group);
   }
 
   const systemUser = await getOrCreateSystemUser(store.organizationId);
   const sales = [];
 
-  for (const group of groups.values()) {
-    const storeProduct = await prisma.storeProduct.findUnique({
-      where: { storeId_productId: { storeId, productId: group.product.id } },
-    });
-    const { sellingPrice } = effectivePrice(storeProduct, group.product);
-    const quantity = group.redemptionIds.length;
+  for (const group of dayGroups.values()) {
+    const items = [];
+    for (const { product, quantity } of group.byProduct.values()) {
+      const storeProduct = await prisma.storeProduct.findUnique({
+        where: { storeId_productId: { storeId, productId: product.id } },
+      });
+      const { sellingPrice } = effectivePrice(storeProduct, product);
+      items.push({ productId: product.id, quantity, unitPrice: Number(sellingPrice), discount: 0 });
+    }
 
     const sale = await createSale({
       organizationId: store.organizationId,
       storeId,
       userId: systemUser.id,
       customerId: null,
-      items: [{ productId: group.product.id, quantity, unitPrice: Number(sellingPrice), discount: 0 }],
+      items,
       discount: 0,
       paymentMethod: VOUCHER_SALE_PAYMENT_METHOD,
       source: "MIKROTIK",
