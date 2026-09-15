@@ -1,61 +1,145 @@
 import PDFDocument from "pdfkit";
 
-function money(amount, currency) {
-  return `${currency} ${Number(amount).toFixed(2)}`;
+const COLORS = {
+  text: "#111827",
+  muted: "#6b7280",
+  line: "#d1d5db",
+  lineDark: "#374151",
+  headerBg: "#f3f4f6",
+};
+
+function formatAmount(amount) {
+  return Number(amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function money(amount, currency) {
+  return `${currency} ${formatAmount(amount)}`;
+}
+
+function formatDate(date) {
+  return new Date(date).toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+// Narrow "receipt roll" layout (~80mm), sized to content so there's no wasted blank
+// space at the bottom — the height below is a generous-but-close estimate; pdfkit
+// simply starts a second page in the rare case a store name/address wraps more than
+// expected, so this never clips content.
 export function buildReceiptPdf(sale, organization) {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A5", margin: 32 });
+    const width = 226;
+    const margin = 16;
+    const contentWidth = width - margin * 2;
+
+    const showStoreName = sale.store.name.trim().toLowerCase() !== organization.name.trim().toLowerCase();
+    let estimatedHeight = margin * 2 + 100;
+    if (showStoreName) estimatedHeight += 13;
+    if (sale.store.phone) estimatedHeight += 12;
+    if (sale.store.address) estimatedHeight += 12;
+    if (sale.customer) estimatedHeight += sale.customer.phone ? 27 : 15;
+    estimatedHeight += 18 + sale.items.length * 16;
+    if (Number(sale.discount) > 0) estimatedHeight += 13;
+    if (Number(sale.tax) > 0) estimatedHeight += 13;
+    estimatedHeight += 70;
+
+    const doc = new PDFDocument({ size: [width, estimatedHeight], margin });
     const chunks = [];
     doc.on("data", (chunk) => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
     const currency = organization.currency;
+    const right = margin + contentWidth;
+    const center = { width: contentWidth, align: "center" };
 
-    doc.fontSize(16).font("Helvetica-Bold").text(organization.name, { align: "center" });
-    doc.fontSize(11).font("Helvetica").text(sale.store.name, { align: "center" });
-    if (sale.store.address) doc.fontSize(9).text(sale.store.address, { align: "center" });
-    if (sale.store.phone) doc.fontSize(9).text(sale.store.phone, { align: "center" });
+    const hr = (color = COLORS.line, weight = 0.75) => {
+      doc.moveTo(margin, doc.y).lineTo(right, doc.y).lineWidth(weight).strokeColor(color).stroke();
+      doc.moveDown(0.55);
+    };
+
+    // --- Header ---
+    doc.font("Helvetica-Bold").fontSize(16).fillColor(COLORS.text).text(organization.name.toUpperCase(), margin, margin, center);
+    doc.moveDown(0.25);
+    doc.font("Helvetica").fontSize(8.5).fillColor(COLORS.muted);
+    if (showStoreName) doc.text(sale.store.name, center);
+    if (sale.store.phone) doc.text(sale.store.phone, center);
+    if (sale.store.address) doc.text(sale.store.address, center);
     doc.moveDown(0.5);
-    doc.moveTo(doc.x, doc.y).lineTo(doc.page.width - doc.page.margins.right, doc.y).stroke();
-    doc.moveDown(0.5);
+    hr();
 
-    doc.fontSize(10).font("Helvetica-Bold").text(`Receipt: ${sale.receiptNumber}`);
-    doc.font("Helvetica").fontSize(9);
-    doc.text(`Date: ${new Date(sale.createdAt).toLocaleString()}`);
-    doc.text(`Cashier: ${sale.cashier.name}`);
-    if (sale.customer) doc.text(`Customer: ${sale.customer.name}`);
-    doc.moveDown(0.5);
-
-    doc.font("Helvetica-Bold");
-    doc.text("Item", doc.x, doc.y, { continued: true, width: 180 });
-    doc.text("Qty", { continued: true, width: 40, align: "right" });
-    doc.text("Price", { continued: true, width: 70, align: "right" });
-    doc.text("Total", { width: 70, align: "right" });
-    doc.font("Helvetica");
-    doc.moveDown(0.2);
-
-    for (const item of sale.items) {
-      doc.text(item.product.name, doc.x, doc.y, { continued: true, width: 180 });
-      doc.text(String(item.quantity), { continued: true, width: 40, align: "right" });
-      doc.text(Number(item.unitPrice).toFixed(2), { continued: true, width: 70, align: "right" });
-      doc.text(Number(item.total).toFixed(2), { width: 70, align: "right" });
+    // --- Customer ---
+    if (sale.customer) {
+      doc.font("Helvetica-Bold").fontSize(9.5).fillColor(COLORS.text).text(sale.customer.name, center);
+      if (sale.customer.phone) doc.font("Helvetica").fontSize(8.5).fillColor(COLORS.muted).text(sale.customer.phone, center);
+      doc.moveDown(0.4);
     }
 
-    doc.moveDown(0.5);
-    doc.moveTo(doc.x, doc.y).lineTo(doc.page.width - doc.page.margins.right, doc.y).stroke();
+    // --- Receipt meta ---
+    doc.font("Helvetica-Bold").fontSize(9).fillColor(COLORS.text).text(`Receipt# ${sale.receiptNumber}`, center);
+    doc.font("Helvetica").fontSize(8.5).fillColor(COLORS.muted).text(formatDate(sale.createdAt), center);
+    doc.text(`Served by ${sale.cashier.name}`, center);
+    doc.moveDown(0.6);
+
+    // --- Items table ---
+    const nameW = 76;
+    const priceW = 40;
+    const qtyW = 22;
+    const totalW = 56;
+    const xName = margin;
+    const xPrice = xName + nameW;
+    const xQty = xPrice + priceW;
+    const xTotal = xQty + qtyW;
+
+    const headerY = doc.y;
+    doc.rect(margin, headerY - 3, contentWidth, 17).fill(COLORS.headerBg);
+    doc.font("Helvetica-Bold").fontSize(8).fillColor(COLORS.text);
+    doc.text("Item", xName + 3, headerY, { width: nameW - 3 });
+    doc.text("Price", xPrice, headerY, { width: priceW, align: "right" });
+    doc.text("Qty", xQty, headerY, { width: qtyW, align: "right" });
+    doc.text("Total", xTotal, headerY, { width: totalW - 3, align: "right" });
+    doc.y = headerY + 19;
+
+    doc.font("Helvetica").fontSize(8.5).fillColor(COLORS.text);
+    for (const item of sale.items) {
+      const rowY = doc.y;
+      doc.text(item.product.name, xName + 3, rowY, { width: nameW - 3, height: 11, ellipsis: true, lineBreak: false });
+      doc.text(formatAmount(item.unitPrice), xPrice, rowY, { width: priceW, align: "right" });
+      doc.text(String(item.quantity), xQty, rowY, { width: qtyW, align: "right" });
+      doc.text(formatAmount(item.total), xTotal, rowY, { width: totalW - 3, align: "right" });
+      doc.y = rowY + 16;
+    }
+
     doc.moveDown(0.3);
+    hr(COLORS.lineDark, 1.25);
 
-    doc.text(`Subtotal: ${money(sale.subtotal, currency)}`, { align: "right" });
-    if (Number(sale.discount) > 0) doc.text(`Discount: -${money(sale.discount, currency)}`, { align: "right" });
-    if (Number(sale.tax) > 0) doc.text(`Tax: ${money(sale.tax, currency)}`, { align: "right" });
-    doc.font("Helvetica-Bold").fontSize(11).text(`Total: ${money(sale.total, currency)}`, { align: "right" });
-    doc.font("Helvetica").fontSize(9).text(`Payment method: ${sale.paymentMethod.replace("_", " ")}`, { align: "right" });
+    // --- Totals --- (explicit label/value columns, not chained "continued" text,
+    // so a wide amount can never wrap onto a second line and collide with the row below)
+    const totalsRow = (label, value, opts = {}) => {
+      const { bold = false, size = 9, color = COLORS.muted, valueColor = COLORS.text, valueWidth = 80 } = opts;
+      const rowY = doc.y;
+      const font = bold ? "Helvetica-Bold" : "Helvetica";
+      doc.font(font).fontSize(size).fillColor(color).text(label, margin, rowY, { width: contentWidth - valueWidth });
+      doc.font(font).fontSize(size).fillColor(valueColor).text(value, margin + contentWidth - valueWidth, rowY, { width: valueWidth, align: "right" });
+      doc.y = rowY + size + 5;
+    };
 
-    doc.moveDown(1);
-    doc.fontSize(9).text("Thank you for your purchase!", { align: "center" });
+    totalsRow("Subtotal", money(sale.subtotal, currency));
+    if (Number(sale.discount) > 0) totalsRow("Discount", `-${money(sale.discount, currency)}`);
+    if (Number(sale.tax) > 0) totalsRow("Tax", money(sale.tax, currency));
+    doc.moveDown(0.25);
+    totalsRow("Grand Total", money(sale.total, currency), { bold: true, size: 12, color: COLORS.text, valueWidth: 110 });
+    doc.moveDown(0.3);
+    doc.font("Helvetica").fontSize(8.5).fillColor(COLORS.muted).text(`Paid via ${sale.paymentMethod.replace("_", " ")}`, margin, doc.y, center);
+
+    doc.moveDown(0.6);
+    hr();
+
+    doc.font("Helvetica").fontSize(9).fillColor(COLORS.muted).text("Thank you, visit again!", margin, doc.y, center);
 
     doc.end();
   });
@@ -63,48 +147,75 @@ export function buildReceiptPdf(sale, organization) {
 
 export function buildReceiptHtml(sale, organization) {
   const currency = organization.currency;
+  const showStoreName = sale.store.name.trim().toLowerCase() !== organization.name.trim().toLowerCase();
+
   const rows = sale.items
     .map(
       (item) => `
       <tr>
-        <td style="padding:6px 8px;border-bottom:1px solid #eee;">${item.product.name}</td>
-        <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;">${item.quantity}</td>
-        <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;">${Number(item.unitPrice).toFixed(2)}</td>
-        <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;">${Number(item.total).toFixed(2)}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;color:#111827;">${item.product.name}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:right;color:#6b7280;">${item.quantity}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:right;color:#6b7280;">${formatAmount(item.unitPrice)}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:right;color:#111827;font-weight:600;">${formatAmount(item.total)}</td>
       </tr>`
     )
     .join("");
 
   return `
-  <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;color:#1f2937;">
-    <h2 style="text-align:center;margin-bottom:0;">${organization.name}</h2>
-    <p style="text-align:center;margin-top:4px;color:#6b7280;">${sale.store.name}${sale.store.address ? " &middot; " + sale.store.address : ""}</p>
-    <hr style="border:none;border-top:1px solid #e5e7eb;" />
-    <p style="font-size:14px;">
-      <strong>Receipt:</strong> ${sale.receiptNumber}<br/>
-      <strong>Date:</strong> ${new Date(sale.createdAt).toLocaleString()}<br/>
-      <strong>Cashier:</strong> ${sale.cashier.name}<br/>
-      ${sale.customer ? `<strong>Customer:</strong> ${sale.customer.name}<br/>` : ""}
+  <div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:380px;margin:0 auto;color:#111827;">
+    <h1 style="text-align:center;margin:0;font-size:22px;letter-spacing:0.5px;">${organization.name.toUpperCase()}</h1>
+    ${showStoreName ? `<p style="text-align:center;margin:4px 0 0;color:#6b7280;font-size:13px;">${sale.store.name}</p>` : ""}
+    ${sale.store.phone ? `<p style="text-align:center;margin:2px 0 0;color:#6b7280;font-size:13px;">${sale.store.phone}</p>` : ""}
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;" />
+
+    ${
+      sale.customer
+        ? `<p style="text-align:center;margin:0 0 16px;">
+             <span style="font-weight:600;font-size:14px;">${sale.customer.name}</span>
+             ${sale.customer.phone ? `<br/><span style="color:#6b7280;font-size:13px;">${sale.customer.phone}</span>` : ""}
+           </p>`
+        : ""
+    }
+
+    <p style="text-align:center;margin:0 0 16px;font-size:13px;">
+      <strong>Receipt# ${sale.receiptNumber}</strong><br/>
+      <span style="color:#6b7280;">${formatDate(sale.createdAt)}</span><br/>
+      <span style="color:#6b7280;">Served by ${sale.cashier.name}</span>
     </p>
+
     <table style="width:100%;border-collapse:collapse;font-size:14px;">
       <thead>
-        <tr>
-          <th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e5e7eb;">Item</th>
-          <th style="text-align:right;padding:6px 8px;border-bottom:2px solid #e5e7eb;">Qty</th>
-          <th style="text-align:right;padding:6px 8px;border-bottom:2px solid #e5e7eb;">Price</th>
-          <th style="text-align:right;padding:6px 8px;border-bottom:2px solid #e5e7eb;">Total</th>
+        <tr style="background:#f3f4f6;">
+          <th style="text-align:left;padding:8px 10px;font-size:12px;color:#374151;">Item</th>
+          <th style="text-align:right;padding:8px 10px;font-size:12px;color:#374151;">Qty</th>
+          <th style="text-align:right;padding:8px 10px;font-size:12px;color:#374151;">Price</th>
+          <th style="text-align:right;padding:8px 10px;font-size:12px;color:#374151;">Total</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>
-    <div style="text-align:right;margin-top:12px;font-size:14px;">
-      <p style="margin:2px 0;">Subtotal: ${money(sale.subtotal, currency)}</p>
-      ${Number(sale.discount) > 0 ? `<p style="margin:2px 0;">Discount: -${money(sale.discount, currency)}</p>` : ""}
-      ${Number(sale.tax) > 0 ? `<p style="margin:2px 0;">Tax: ${money(sale.tax, currency)}</p>` : ""}
-      <p style="margin:6px 0;font-size:18px;font-weight:bold;">Total: ${money(sale.total, currency)}</p>
-      <p style="margin:2px 0;color:#6b7280;">Paid via ${sale.paymentMethod.replace("_", " ")}</p>
+
+    <div style="border-top:2px solid #374151;margin-top:8px;padding-top:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#6b7280;margin:2px 0;">
+        <span>Subtotal</span><span>${money(sale.subtotal, currency)}</span>
+      </div>
+      ${
+        Number(sale.discount) > 0
+          ? `<div style="display:flex;justify-content:space-between;font-size:13px;color:#6b7280;margin:2px 0;"><span>Discount</span><span>-${money(sale.discount, currency)}</span></div>`
+          : ""
+      }
+      ${
+        Number(sale.tax) > 0
+          ? `<div style="display:flex;justify-content:space-between;font-size:13px;color:#6b7280;margin:2px 0;"><span>Tax</span><span>${money(sale.tax, currency)}</span></div>`
+          : ""
+      }
+      <div style="display:flex;justify-content:space-between;font-size:19px;font-weight:700;margin:8px 0 2px;">
+        <span>Grand Total</span><span>${money(sale.total, currency)}</span>
+      </div>
+      <p style="text-align:right;color:#6b7280;font-size:12px;margin:0;">Paid via ${sale.paymentMethod.replace("_", " ")}</p>
     </div>
-    <hr style="border:none;border-top:1px solid #e5e7eb;margin-top:16px;" />
-    <p style="text-align:center;color:#6b7280;">Thank you for your purchase!</p>
+
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:18px 0 12px;" />
+    <p style="text-align:center;color:#6b7280;font-size:13px;">Thank you, visit again!</p>
   </div>`;
 }
