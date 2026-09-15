@@ -31,7 +31,7 @@ export default function ProductPerformancePage() {
   useEffect(load, [range, currentStoreId]);
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader title="Product Performance" actions={<DateRangeFilter value={range} onChange={setRange} />} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

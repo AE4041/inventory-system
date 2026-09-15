@@ -46,7 +46,7 @@ export default function ExpensesReportPage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader
         title="Expenses Report"
         actions={

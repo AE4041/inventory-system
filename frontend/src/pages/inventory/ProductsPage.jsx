@@ -162,7 +162,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader
         title="Products"
         subtitle={

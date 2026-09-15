@@ -65,11 +65,11 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-card p-4">
               <Skeleton width="40%" height="0.9rem" className="mb-4" />
-              <Skeleton height="240px" borderRadius="12px" />
+              <Skeleton height="240px" borderRadius="7px" />
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
               <Skeleton width="60%" height="0.9rem" className="mb-4" />
-              <Skeleton height="240px" borderRadius="12px" />
+              <Skeleton height="240px" borderRadius="7px" />
             </div>
           </div>
         </div>

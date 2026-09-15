@@ -98,7 +98,7 @@ export default function ExpensesPage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader
         title="Expenses"
         actions={

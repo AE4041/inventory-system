@@ -3,6 +3,21 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Overrides Tailwind v4's built-in radius scale so every rounded-* utility (rounded-md,
+   rounded-lg, rounded-xl, rounded-2xl, ...) resolves to the same 7px corner everywhere —
+   one edit point instead of hunting down every individual rounded-* class across the app.
+   rounded-full is untouched (hardcoded 9999px in Tailwind, not part of this scale), so
+   circular avatars/badges/icon buttons stay circular. */
+@theme {
+  --radius-xs: 7px;
+  --radius-sm: 7px;
+  --radius-md: 7px;
+  --radius-lg: 7px;
+  --radius-xl: 7px;
+  --radius-2xl: 7px;
+  --radius-3xl: 7px;
+}
+
 :root {
   color-scheme: light;
   --brand: #7c3aed;
@@ -48,7 +63,7 @@
   --p-surface-900: #0f172a;
   --p-surface-950: #020617;
 
-  --p-content-border-radius: 10px;
+  --p-content-border-radius: 7px;
   --p-content-border-color: var(--p-surface-200);
   --p-content-hover-background: var(--p-surface-100);
   --p-content-hover-color: var(--p-surface-800);
@@ -66,7 +81,6 @@
      opacity overlays on top of this flat color rather than separate shade tokens.
      The desktop sidebar is plain Tailwind today, not a PrimeReact component. */
   --color-sidebar: #ffffff;
-  --radius-2xl: 1rem;
   --shadow-card: 0 1px 3px 0 rgb(15 23 42 / 0.06), 0 1px 2px -1px rgb(15 23 42 / 0.04);
 }
 
@@ -168,7 +182,6 @@ body {
   --p-text-muted-color: var(--p-text-muted-color);
   --p-text-hover-muted-color: var(--p-text-hover-muted-color);
   --color-sidebar: var(--color-sidebar);
-  --radius-2xl: var(--radius-2xl);
   --shadow-card: var(--shadow-card);
 }
 

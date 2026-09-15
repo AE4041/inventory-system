@@ -25,7 +25,7 @@ export default function LowStockPage() {
   }, [currentStoreId]);
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader title="Low Stock" subtitle="Products at or below their minimum stock level" />
       <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
         <DataTable value={rows.data} loading={loading} paginator rows={20} emptyMessage={<EmptyState icon="pi-check-circle" title="All good — nothing is low on stock" subtitle="Products at or below their minimum level will show up here." />}>

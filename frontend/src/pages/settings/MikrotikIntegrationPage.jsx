@@ -102,7 +102,7 @@ export default function MikrotikIntegrationPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-7xl px-5 space-y-6">
       <PageHeader title="MikroTik Voucher Integration" subtitle="Connect each router's hotspot voucher sales to this store's inventory and reports." />
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">

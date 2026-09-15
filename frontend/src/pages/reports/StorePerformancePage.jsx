@@ -30,7 +30,7 @@ export default function StorePerformancePage() {
   useEffect(load, [range]);
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader title="Store Performance" subtitle="Compare branches side by side" actions={<DateRangeFilter value={range} onChange={setRange} />} />
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 mb-5">

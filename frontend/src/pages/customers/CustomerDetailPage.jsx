@@ -34,7 +34,7 @@ export default function CustomerDetailPage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader
         title={customer.name}
         subtitle={[customer.phone, customer.email].filter(Boolean).join(" · ") || "No contact info"}

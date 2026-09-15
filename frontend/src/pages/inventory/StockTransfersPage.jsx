@@ -85,7 +85,7 @@ export default function StockTransfersPage() {
   const storeOptions = stores.map((s) => ({ label: s.name, value: s.id }));
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <ConfirmDialog />
       <PageHeader title="Stock Transfers" subtitle="Move inventory between stores" />
 

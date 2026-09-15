@@ -45,7 +45,7 @@ export default function ExpenseCategoriesPage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader title="Expense Categories" />
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 mb-5 flex gap-2 max-w-md">

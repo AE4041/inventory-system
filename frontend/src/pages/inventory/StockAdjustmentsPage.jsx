@@ -70,7 +70,7 @@ export default function StockAdjustmentsPage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader title="Stock Adjustments" subtitle="Add, deduct, or set exact stock counts" />
 
       {isAllStores ? (

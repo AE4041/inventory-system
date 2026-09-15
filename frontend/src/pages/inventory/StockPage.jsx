@@ -37,7 +37,7 @@ export default function StockPage() {
   const filtered = search ? rows.data.filter((r) => r.product.name.toLowerCase().includes(search.toLowerCase())) : rows.data;
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader title="Stock" subtitle="Current inventory levels" />
 
       {valuation && (

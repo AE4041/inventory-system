@@ -40,7 +40,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader title="Settings" />
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-card max-w-2xl overflow-hidden">

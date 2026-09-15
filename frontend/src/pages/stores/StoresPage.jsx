@@ -69,7 +69,7 @@ export default function StoresPage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader title="Stores" actions={<Button label="Add Store" icon="pi pi-plus" onClick={openCreate} />} />
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">

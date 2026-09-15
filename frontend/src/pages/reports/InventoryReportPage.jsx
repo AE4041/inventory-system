@@ -34,7 +34,7 @@ export default function InventoryReportPage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader title="Inventory Report" actions={<Button label="Export CSV" icon="pi pi-download" outlined onClick={handleExport} />} />
 
       {result && (
