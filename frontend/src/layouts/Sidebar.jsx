@@ -8,7 +8,7 @@ export default function SidebarNav({ role, onNavigate }) {
       {NAV_SECTIONS.filter((section) => !section.roles || section.roles.includes(role)).map((section, idx) => (
         <div key={idx}>
           {section.title && (
-            <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-white/45">{section.title}</p>
+            <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">{section.title}</p>
           )}
           <div className="space-y-0.5">
             {section.items
@@ -21,7 +21,7 @@ export default function SidebarNav({ role, onNavigate }) {
                   onClick={onNavigate}
                   className={({ isActive }) =>
                     `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
-                      isActive ? "bg-white/15 text-white font-semibold" : "text-white/70 hover:bg-white/10 hover:text-white"
+                      isActive ? "bg-violet-600 text-white font-semibold shadow-sm" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                     }`
                   }
                 >
@@ -29,7 +29,7 @@ export default function SidebarNav({ role, onNavigate }) {
                     const Icon = resolveIcon(item.icon);
                     return (
                       <>
-                        {Icon && <Icon className={isActive ? "text-white" : "text-white/60"} />}
+                        {Icon && <Icon className={isActive ? "text-white" : "text-gray-400"} />}
                         {item.label}
                       </>
                     );

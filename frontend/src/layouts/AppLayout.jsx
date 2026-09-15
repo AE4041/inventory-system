@@ -32,9 +32,9 @@ export default function AppLayout() {
 
   return (
     <div className="h-full flex bg-gray-50">
-      <aside className="hidden md:flex md:flex-col w-64 bg-sidebar shrink-0">
-        <div className="h-16 flex items-center px-5 border-b border-white/10">
-          <Logo orgName={user.organization?.name} dark />
+      <aside className="hidden md:flex md:flex-col w-64 bg-sidebar border-r border-gray-100 shrink-0">
+        <div className="h-16 flex items-center px-5 border-b border-gray-100">
+          <Logo orgName={user.organization?.name} />
         </div>
         <SidebarNav role={user.role} />
       </aside>
@@ -42,10 +42,10 @@ export default function AppLayout() {
       <Drawer open={mobileOpen} onOpenChange={(e) => setMobileOpen(e.value)} position="left">
         <DrawerPortal>
           <DrawerBackdrop />
-          <DrawerPopup className="w-72 !bg-sidebar !border-0">
+          <DrawerPopup className="w-72 !bg-sidebar">
             <DrawerContent>
               <div className="mb-3 mt-5">
-                <Logo orgName={user.organization?.name} dark />
+                <Logo orgName={user.organization?.name} />
               </div>
               <SidebarNav role={user.role} onNavigate={() => setMobileOpen(false)} />
             </DrawerContent>
