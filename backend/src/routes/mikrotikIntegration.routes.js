@@ -13,6 +13,9 @@ import {
   closeStoreDay,
   closeDay,
   closeDayAll,
+  getPendingVouchers,
+  addPendingVoucher,
+  removePendingVoucher,
 } from "../controllers/mikrotikIntegration.controller.js";
 
 const router = Router();
@@ -33,6 +36,13 @@ const mappingSchema = z.object({
   productId: z.string(),
 });
 
+const addPendingVoucherSchema = z.object({
+  storeId: z.string(),
+  productId: z.string(),
+  quantity: z.coerce.number().int().positive().max(500),
+  note: z.string().max(200).optional(),
+});
+
 // Router-facing webhooks — authenticated by the store's own token, not a user login.
 router.post("/vouchers/generated", authenticateStoreToken, validateBody(voucherGeneratedSchema), voucherGenerated);
 router.post("/vouchers/redeemed", authenticateStoreToken, validateBody(voucherRedeemedSchema), voucherRedeemed);
@@ -49,5 +59,8 @@ router.get("/mappings", authorize("ADMIN", "MANAGER"), listMappings);
 router.post("/mappings", authorize("ADMIN", "MANAGER"), validateBody(mappingSchema), upsertMapping);
 router.delete("/mappings/:id", authorize("ADMIN"), deleteMapping);
 router.post("/close-day", authorize("ADMIN"), closeDay);
+router.get("/pending", authorize("ADMIN", "MANAGER"), getPendingVouchers);
+router.post("/pending", authorize("ADMIN", "MANAGER"), validateBody(addPendingVoucherSchema), addPendingVoucher);
+router.delete("/pending/:id", authorize("ADMIN", "MANAGER"), removePendingVoucher);
 
 export default router;

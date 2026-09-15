@@ -35,6 +35,9 @@ export const mikrotikApi = {
   upsertMapping: (data) => api.post("/integrations/mikrotik/mappings", data),
   deleteMapping: (id) => api.delete(`/integrations/mikrotik/mappings/${id}`),
   closeDay: () => api.post("/integrations/mikrotik/close-day"),
+  getPending: (storeId) => api.get("/integrations/mikrotik/pending", { params: { storeId } }),
+  addPending: (data) => api.post("/integrations/mikrotik/pending", data),
+  removePending: (id) => api.delete(`/integrations/mikrotik/pending/${id}`),
 };
 
 export const categoriesApi = {

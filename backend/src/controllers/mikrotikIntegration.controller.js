@@ -3,7 +3,13 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
 import { applyInventoryChange } from "../services/inventory.service.js";
 import { getOrCreateSystemUser } from "../services/systemUser.service.js";
-import { closeOutStore, closeOutAllStores } from "../services/voucherCloseOut.service.js";
+import {
+  closeOutStore,
+  closeOutAllStores,
+  getPendingVoucherSummary,
+  addManualVoucherRedemptions,
+  removePendingVoucherRedemption,
+} from "../services/voucherCloseOut.service.js";
 
 async function resolveProduct(organizationId, profileName) {
   const mapping = await prisma.voucherProfileMapping.findUnique({
@@ -131,4 +137,45 @@ export const closeDay = asyncHandler(async (req, res) => {
 export const closeDayAll = asyncHandler(async (req, res) => {
   const results = await closeOutAllStores();
   res.json({ success: true, data: results });
+});
+
+// --- Admin-facing: the "MikroTik cart" preview on the POS screen ---
+// Read-only look at today's not-yet-closed-out redemptions for one store, plus manual
+// corrections (add a hand-sold voucher, remove a mistaken one) before the real close-out
+// (router trigger / cron / the button above) turns them into a Sale.
+
+async function requireOwnStore(organizationId, storeId) {
+  const store = await prisma.store.findFirst({ where: { id: storeId, organizationId } });
+  if (!store) throw ApiError.notFound("Store not found");
+  return store;
+}
+
+export const getPendingVouchers = asyncHandler(async (req, res) => {
+  const { storeId } = req.query;
+  if (!storeId) throw ApiError.badRequest("storeId is required");
+  await requireOwnStore(req.user.organizationId, storeId);
+
+  const summary = await getPendingVoucherSummary(storeId);
+  res.json({ success: true, data: summary });
+});
+
+export const addPendingVoucher = asyncHandler(async (req, res) => {
+  const { storeId, productId, quantity, note } = req.body;
+  await requireOwnStore(req.user.organizationId, storeId);
+
+  const product = await prisma.product.findFirst({ where: { id: productId, organizationId: req.user.organizationId } });
+  if (!product) throw ApiError.notFound("Product not found");
+
+  const created = await addManualVoucherRedemptions({ storeId, productId, quantity, userId: req.user.id, note });
+  res.status(201).json({ success: true, data: { created: created.length } });
+});
+
+export const removePendingVoucher = asyncHandler(async (req, res) => {
+  const redemption = await prisma.voucherRedemption.findFirst({
+    where: { id: req.params.id, store: { organizationId: req.user.organizationId } },
+  });
+  if (!redemption) throw ApiError.notFound("Voucher redemption not found");
+
+  await removePendingVoucherRedemption({ redemptionId: redemption.id, userId: req.user.id });
+  res.json({ success: true, data: { id: redemption.id } });
 });

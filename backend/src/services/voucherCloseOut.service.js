@@ -1,15 +1,26 @@
 import { prisma } from "../lib/prisma.js";
 import { createSale } from "./sales.service.js";
 import { getOrCreateSystemUser } from "./systemUser.service.js";
+import { applyInventoryChange } from "./inventory.service.js";
 import { effectivePrice } from "../utils/pricing.js";
+import { ApiError } from "../utils/apiError.js";
 
 const VOUCHER_SALE_PAYMENT_METHOD = "MOBILE_MONEY";
+
+function round2(n) {
+  return Math.round(n * 100) / 100;
+}
 
 // Server-local calendar-day key (not just the raw date, since redeemedAt is a full
 // timestamp) — this is what lets a recovery run split a multi-day backlog into one Sale
 // per day instead of merging everything into a single lump.
 function dayKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function startOfToday() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
 // Rolls up one store's not-yet-invoiced voucher redemptions into one Sale per day —
@@ -100,4 +111,104 @@ export async function closeOutAllStores() {
     results.push(await closeOutStore(storeId));
   }
   return results;
+}
+
+// Read-only preview of what today's close-out would produce for one store — the "MikroTik
+// cart" on the POS screen. Deliberately scoped to today only: a multi-day backlog is a rare
+// recovery case already handled correctly by closeOutStore/the cron fallback, not something
+// this live running-total view needs to manage — it's just surfaced as a count so nothing
+// pending is silently invisible.
+export async function getPendingVoucherSummary(storeId) {
+  const start = startOfToday();
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+
+  const [todayRedemptions, olderPendingCount] = await Promise.all([
+    prisma.voucherRedemption.findMany({
+      where: { storeId, saleId: null, redeemedAt: { gte: start, lt: end } },
+      include: { product: true },
+      orderBy: { redeemedAt: "asc" },
+    }),
+    prisma.voucherRedemption.count({ where: { storeId, saleId: null, redeemedAt: { lt: start } } }),
+  ]);
+
+  const byProduct = new Map();
+  for (const redemption of todayRedemptions) {
+    const group = byProduct.get(redemption.productId) ?? { product: redemption.product, redemptions: [] };
+    group.redemptions.push(redemption);
+    byProduct.set(redemption.productId, group);
+  }
+
+  const items = [];
+  for (const { product, redemptions } of byProduct.values()) {
+    const storeProduct = await prisma.storeProduct.findUnique({
+      where: { storeId_productId: { storeId, productId: product.id } },
+    });
+    const { sellingPrice } = effectivePrice(storeProduct, product);
+    const unitPrice = Number(sellingPrice);
+    const quantity = redemptions.length;
+    items.push({
+      productId: product.id,
+      productName: product.name,
+      unitPrice,
+      quantity,
+      total: round2(unitPrice * quantity),
+      redemptions: redemptions.map((r) => ({ id: r.id, voucherCode: r.voucherCode, profile: r.profile, redeemedAt: r.redeemedAt })),
+    });
+  }
+  items.sort((a, b) => a.productName.localeCompare(b.productName));
+
+  return { items, grandTotal: round2(items.reduce((sum, item) => sum + item.total, 0)), olderPendingCount };
+}
+
+// Manually adds `quantity` voucher "redemptions" for a product that wasn't reported by the
+// router (e.g. sold by hand at the counter) — deducts stock immediately and inserts plain
+// VoucherRedemption rows with no voucherCode, exactly like a real webhook call, so they flow
+// through the same close-out/day-grouping logic as everything else.
+export async function addManualVoucherRedemptions({ storeId, productId, quantity, userId, note }) {
+  const product = await prisma.product.findUnique({ where: { id: productId } });
+  if (!product) throw ApiError.notFound("Product not found");
+
+  const mapping = await prisma.voucherProfileMapping.findUnique({ where: { productId } });
+  const profile = mapping?.profileName || product.name;
+
+  const created = [];
+  await prisma.$transaction(async (tx) => {
+    for (let i = 0; i < quantity; i++) {
+      await applyInventoryChange(tx, {
+        storeId,
+        productId,
+        userId,
+        type: "SALE",
+        quantity: 1,
+        reason: note || `Manually added voucher sale (${profile})`,
+      });
+      created.push(await tx.voucherRedemption.create({ data: { storeId, productId, profile, voucherCode: null } }));
+    }
+  });
+
+  return created;
+}
+
+// Removes one pending (not-yet-closed-out) redemption from today's count — e.g. a mistaken
+// or duplicate entry — and restores the stock unit that was deducted when it was redeemed,
+// so the store's stock count stays accurate. Refuses once a redemption has already been
+// rolled into a Sale, since that revenue is already booked.
+export async function removePendingVoucherRedemption({ redemptionId, userId }) {
+  const redemption = await prisma.voucherRedemption.findUnique({ where: { id: redemptionId } });
+  if (!redemption) throw ApiError.notFound("Voucher redemption not found");
+  if (redemption.saleId) throw ApiError.badRequest("This voucher has already been closed out into a sale and can no longer be edited");
+
+  await prisma.$transaction(async (tx) => {
+    await applyInventoryChange(tx, {
+      storeId: redemption.storeId,
+      productId: redemption.productId,
+      userId,
+      type: "REFUND",
+      quantity: 1,
+      reason: `Removed from MikroTik close-out cart${redemption.voucherCode ? ` (voucher ${redemption.voucherCode})` : ""}`,
+    });
+    await tx.voucherRedemption.delete({ where: { id: redemption.id } });
+  });
+
+  return redemption;
 }

@@ -11,6 +11,7 @@ import { productsApi, categoriesApi, customersApi, salesApi } from "../../servic
 import { apiErrorMessage } from "../../services/api";
 import { formatCurrency } from "../../utils/format";
 import ReceiptDialog from "../../components/ReceiptDialog";
+import MikrotikVoucherCart from "./MikrotikVoucherCart";
 
 const PAYMENT_METHODS = [
   { label: "Cash", value: "CASH" },
@@ -42,6 +43,8 @@ export default function NewSalePage() {
   const [customerId, setCustomerId] = useState(null);
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [newCustomer, setNewCustomer] = useState({ name: "", phone: "", email: "" });
+
+  const [activeTab, setActiveTab] = useState("manual");
 
   const [completing, setCompleting] = useState(false);
   const [completedSale, setCompletedSale] = useState(null);
@@ -173,7 +176,28 @@ export default function NewSalePage() {
   }
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 h-full">
+    <div className="flex flex-col h-full">
+      <div className="flex gap-1 mb-3 bg-gray-100 rounded-lg p-1 w-fit shrink-0">
+        <button
+          onClick={() => setActiveTab("manual")}
+          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === "manual" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+        >
+          Manual Sale
+        </button>
+        <button
+          onClick={() => setActiveTab("mikrotik")}
+          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === "mikrotik" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+        >
+          MikroTik Vouchers
+        </button>
+      </div>
+
+      {activeTab === "mikrotik" ? (
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <MikrotikVoucherCart storeId={currentStoreId} currency={currency} />
+        </div>
+      ) : (
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 flex-1 min-h-0">
       <div className="xl:col-span-2 flex flex-col min-h-0">
         <div className="flex gap-2 mb-3">
           <span className="p-input-icon-left flex-1">
@@ -302,6 +326,8 @@ export default function NewSalePage() {
             <i className="pi pi-arrow-up" />
           </span>
         </button>
+      )}
+      </div>
       )}
 
       <Dialog header="Add Customer" visible={showNewCustomer} onHide={() => setShowNewCustomer(false)} style={{ width: "24rem" }}>
