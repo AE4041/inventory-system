@@ -92,7 +92,7 @@ export default function MikrotikVoucherCart({ storeId, currency }) {
   const items = summary?.items || [];
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-card flex flex-col max-w-2xl mx-auto">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-card flex flex-col mx-auto w-full max-w-7xl px-5">
       <ConfirmDialog />
       <div className="p-4 border-b border-gray-100 flex items-center justify-between">
         <div>

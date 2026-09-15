@@ -92,7 +92,7 @@ export default function SalesHistoryPage({ fixedStatus }) {
   }
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl px-5">
       <ConfirmDialog />
       <PageHeader
         title={fixedStatus === "REFUNDED" ? "Refunds" : "Sales History"}

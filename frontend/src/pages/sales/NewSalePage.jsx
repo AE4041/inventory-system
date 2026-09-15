@@ -169,7 +169,7 @@ export default function NewSalePage() {
 
   if (isAllStores) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-10 text-center text-gray-500">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-card p-10 text-center text-gray-500 mx-auto w-full max-w-7xl px-5">
         <Icon className="pi-info-circle text-2xl mb-2 block" />
         Select a specific store from the top bar to start a new sale.
       </div>
@@ -177,7 +177,7 @@ export default function NewSalePage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full mx-auto w-full max-w-7xl px-5">
       <div className="flex gap-1 mb-3 bg-gray-100 rounded-lg p-1 w-fit shrink-0">
         <button
           onClick={() => setActiveTab("manual")}
