@@ -123,9 +123,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-            <StatCard label="Total Sales" value={formatCurrency(data.sales.totalSales, currency)} icon="pi-chart-line" accent="blue" />
             <StatCard label="Total Expenses" value={formatCurrency(data.expenses.totalExpenses, currency)} icon="pi-money-bill" accent="red" />
-            <StatCard label="Net Revenue" value={formatCurrency(data.netRevenue, currency)} icon="pi-wallet" accent="green" />
             <StatCard label="Transactions" value={data.sales.transactions.toLocaleString()} icon="pi-receipt" accent="purple" />
             <StatCard label="Products Sold" value={data.sales.productsSold.toLocaleString()} icon="pi-box" accent="amber" />
             <StatCard label="Customers" value={data.customersCount.toLocaleString()} icon="pi-users" accent="blue" />
