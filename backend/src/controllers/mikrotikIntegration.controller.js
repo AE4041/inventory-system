@@ -48,6 +48,12 @@ export const voucherGenerated = asyncHandler(async (req, res) => {
 // Called on every hotspot login — records the redemption and deducts one unit of stock
 // immediately (so "vouchers remaining" stays accurate through the day). The revenue itself
 // is only booked once the nightly close-out rolls this into a Sale.
+//
+// Idempotent on voucherCode: the router's script can legitimately fire this twice for the
+// same login (a retried request after a timed-out response, a reboot mid-script, etc.), and
+// without a dedupe check that double-deducts stock and double-counts revenue at close-out.
+// A DB-level unique constraint on (storeId, voucherCode) is the source of truth; the
+// pre-check just avoids the extra inventory-change/transaction work on the common case.
 export const voucherRedeemed = asyncHandler(async (req, res) => {
   const { profile, voucherCode } = req.body;
   if (!profile) throw ApiError.badRequest("profile is required");
@@ -56,22 +62,39 @@ export const voucherRedeemed = asyncHandler(async (req, res) => {
   const productId = await resolveProduct(store.organizationId, profile);
   const systemUser = await getOrCreateSystemUser(store.organizationId);
 
-  const redemption = await prisma.$transaction(async (tx) => {
-    await applyInventoryChange(tx, {
-      storeId: store.id,
-      productId,
-      userId: systemUser.id,
-      type: "SALE",
-      quantity: 1,
-      reason: `Voucher redeemed (${profile})${voucherCode ? ` - ${voucherCode}` : ""}`,
+  if (voucherCode) {
+    const existing = await prisma.voucherRedemption.findUnique({
+      where: { storeId_voucherCode: { storeId: store.id, voucherCode } },
+    });
+    if (existing) return res.status(200).json({ success: true, data: existing, duplicate: true });
+  }
+
+  try {
+    const redemption = await prisma.$transaction(async (tx) => {
+      await applyInventoryChange(tx, {
+        storeId: store.id,
+        productId,
+        userId: systemUser.id,
+        type: "SALE",
+        quantity: 1,
+        reason: `Voucher redeemed (${profile})${voucherCode ? ` - ${voucherCode}` : ""}`,
+      });
+
+      return tx.voucherRedemption.create({
+        data: { storeId: store.id, productId, profile, voucherCode: voucherCode || null },
+      });
     });
 
-    return tx.voucherRedemption.create({
-      data: { storeId: store.id, productId, profile, voucherCode: voucherCode || null },
-    });
-  });
-
-  res.status(201).json({ success: true, data: redemption });
+    res.status(201).json({ success: true, data: redemption });
+  } catch (err) {
+    if (err.code === "P2002" && voucherCode) {
+      const existing = await prisma.voucherRedemption.findUnique({
+        where: { storeId_voucherCode: { storeId: store.id, voucherCode } },
+      });
+      if (existing) return res.status(200).json({ success: true, data: existing, duplicate: true });
+    }
+    throw err;
+  }
 });
 
 // --- Admin-facing: profile <-> product mapping, token management, manual close-out ---

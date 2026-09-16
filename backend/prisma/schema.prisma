@@ -418,6 +418,9 @@ model VoucherRedemption {
   voucherCode String?
   redeemedAt  DateTime @default(now())
 
+  // Postgres treats NULL as distinct in unique constraints, so this only dedupes real
+  // voucher codes from the router — manual redemptions (voucherCode: null) are unaffected.
+  @@unique([storeId, voucherCode])
   @@index([storeId, productId, saleId])
   @@index([redeemedAt])
 }
