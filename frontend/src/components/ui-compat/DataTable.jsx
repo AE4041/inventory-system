@@ -48,7 +48,7 @@ export function DataTable({
 
   return (
     <div className={cn("relative", className)}>
-      <div className="overflow-x-auto rounded-xl border border-surface-200">
+      <div className="overflow-x-auto rounded-xl border border-surface-200 dark:border-gray-700">
         <PRDataTable.Root value={pageRows} className="w-full">
           <PRDataTable.TableContainer>
             <PRDataTable.Table className="w-full text-sm border-separate border-spacing-0">
@@ -57,7 +57,7 @@ export function DataTable({
                   {columns.map((col, i) => (
                     <PRDataTable.THeadCell
                       key={i}
-                      className="text-left py-2.5 px-3.5 bg-surface-50 text-[11px] font-semibold uppercase tracking-wide text-surface-500 border-b border-surface-200 whitespace-nowrap"
+                      className="text-left py-2.5 px-3.5 bg-surface-50 dark:bg-gray-900/50 text-[11px] font-semibold uppercase tracking-wide text-surface-500 dark:text-gray-400 border-b border-surface-200 dark:border-gray-700 whitespace-nowrap"
                     >
                       {col.header}
                     </PRDataTable.THeadCell>
@@ -66,9 +66,9 @@ export function DataTable({
               </PRDataTable.THead>
               <PRDataTable.TBody>
                 {pageRows.map((row, ri) => (
-                  <PRDataTable.Row key={row.id ?? ri} className="border-b border-surface-100 last:border-b-0 hover:bg-surface-50 transition-colors">
+                  <PRDataTable.Row key={row.id ?? ri} className="border-b border-surface-100 dark:border-gray-700 last:border-b-0 hover:bg-surface-50 dark:hover:bg-gray-700/50 transition-colors">
                     {columns.map((col, ci) => (
-                      <PRDataTable.Cell key={ci} className={cn("py-2.5 px-3.5 whitespace-nowrap text-surface-700", col.className)}>
+                      <PRDataTable.Cell key={ci} className={cn("py-2.5 px-3.5 whitespace-nowrap text-surface-700 dark:text-gray-200", col.className)}>
                         {col.body ? col.body(row) : row[col.field]}
                       </PRDataTable.Cell>
                     ))}
@@ -89,13 +89,13 @@ export function DataTable({
         </PRDataTable.Root>
         {loading && (
           <div className="flex justify-center py-6">
-            <Spinner className="animate-spin size-5 text-surface-400" />
+            <Spinner className="animate-spin size-5 text-surface-400 dark:text-gray-500" />
           </div>
         )}
       </div>
 
       {paginator && effectiveTotal > rows && (
-        <div className="flex items-center justify-between pt-3 text-sm text-surface-500">
+        <div className="flex items-center justify-between pt-3 text-sm text-surface-500 dark:text-gray-400">
           <span>
             Page {currentPage + 1} of {pageCount}
           </span>
@@ -103,14 +103,14 @@ export function DataTable({
             <button
               disabled={currentPage === 0}
               onClick={() => goToPage(currentPage - 1)}
-              className="px-3 py-1 rounded-md border border-surface-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-50"
+              className="px-3 py-1 rounded-md border border-surface-200 dark:border-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-50 dark:hover:bg-gray-700"
             >
               Prev
             </button>
             <button
               disabled={currentPage >= pageCount - 1}
               onClick={() => goToPage(currentPage + 1)}
-              className="px-3 py-1 rounded-md border border-surface-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-50"
+              className="px-3 py-1 rounded-md border border-surface-200 dark:border-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-50 dark:hover:bg-gray-700"
             >
               Next
             </button>

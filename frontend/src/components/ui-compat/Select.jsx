@@ -34,13 +34,13 @@ export function Select({
       filter={filter}
       onValueChange={(e) => onChange?.({ value: e.value, originalEvent: e.originalEvent })}
       className={cn(
-        "group inline-flex cursor-pointer relative select-none rounded-md border border-surface-300 hover:border-surface-400 focus-within:border-primary! data-disabled:bg-surface-100 data-disabled:text-surface-400 data-disabled:pointer-events-none bg-surface-0 text-sm transition-colors",
+        "group inline-flex cursor-pointer relative select-none rounded-md border border-surface-300 dark:border-gray-600 hover:border-surface-400 dark:hover:border-gray-500 focus-within:border-primary! data-disabled:bg-surface-100 dark:data-disabled:bg-gray-800 data-disabled:text-surface-400 dark:data-disabled:text-gray-500 data-disabled:pointer-events-none bg-surface-0 dark:bg-gray-800 text-sm transition-colors",
         className
       )}
       {...rest}
     >
       <PRSelect.Trigger className="flex items-center w-full outline-none cursor-pointer py-1.5 px-2.5">
-        <PRSelect.Value className="block whitespace-nowrap overflow-hidden flex-auto w-[1%] text-ellipsis text-left bg-transparent border-none outline-none data-placeholder:text-surface-400 text-surface-700" placeholder={placeholder}>
+        <PRSelect.Value className="block whitespace-nowrap overflow-hidden flex-auto w-[1%] text-ellipsis text-left bg-transparent border-none outline-none data-placeholder:text-surface-400 dark:data-placeholder:text-gray-500 text-surface-700 dark:text-gray-200" placeholder={placeholder}>
           {valueTemplate
             ? (instance) => {
                 const selected = options.find((o) => (optionValue ? o[optionValue] : o.value) === instance.select?.state?.value);
@@ -49,22 +49,22 @@ export function Select({
             : undefined}
         </PRSelect.Value>
         {showClear && (
-          <PRSelect.Clear className="text-surface-400 hover:text-surface-600 shrink-0 mr-1">
+          <PRSelect.Clear className="text-surface-400 dark:text-gray-500 hover:text-surface-600 dark:hover:text-gray-300 shrink-0 mr-1">
             <Times className="size-3.5" />
           </PRSelect.Clear>
         )}
-        <PRSelect.Indicator className="flex items-center justify-center shrink-0 bg-transparent text-surface-400 w-6">
+        <PRSelect.Indicator className="flex items-center justify-center shrink-0 bg-transparent text-surface-400 dark:text-gray-500 w-6">
           <ChevronDown className="size-3.5" />
         </PRSelect.Indicator>
       </PRSelect.Trigger>
       <PRSelect.Portal>
         <PRSelect.Positioner>
-          <PRSelect.Popup className="rounded-md min-w-(--px-positioner-anchor-width) bg-surface-0 border border-surface-200 text-surface-700 shadow-md origin-(--px-transform-origin) data-enter-from:opacity-0 data-enter-from:scale-95 data-leave-to:opacity-0 data-leave-to:scale-95 transition-[opacity,scale] duration-150 ease-out">
+          <PRSelect.Popup className="rounded-md min-w-(--px-positioner-anchor-width) bg-surface-0 dark:bg-gray-800 border border-surface-200 dark:border-gray-700 text-surface-700 dark:text-gray-200 shadow-md origin-(--px-transform-origin) data-enter-from:opacity-0 data-enter-from:scale-95 data-leave-to:opacity-0 data-leave-to:scale-95 transition-[opacity,scale] duration-150 ease-out">
             {filter && (
               <PRSelect.Header className="p-2">
                 <PRSelect.Filter
                   placeholder="Search..."
-                  className="w-full rounded-md outline-hidden bg-surface-0 text-sm border border-surface-300 focus:border-primary px-2.5 py-1.5"
+                  className="w-full rounded-md outline-hidden bg-surface-0 dark:bg-gray-900 text-sm border border-surface-300 dark:border-gray-600 focus:border-primary px-2.5 py-1.5 text-surface-700 dark:text-gray-200"
                 />
               </PRSelect.Header>
             )}
@@ -76,7 +76,7 @@ export function Select({
                     <PRSelect.Option
                       key={index}
                       index={index}
-                      className="whitespace-nowrap relative flex items-center gap-2 px-2.5 py-1.5 border-none text-sm select-none cursor-pointer rounded-sm data-focused:bg-surface-100 data-selected:bg-primary-50 data-selected:text-primary-700 text-surface-700 transition-colors"
+                      className="whitespace-nowrap relative flex items-center gap-2 px-2.5 py-1.5 border-none text-sm select-none cursor-pointer rounded-sm data-focused:bg-surface-100 dark:data-focused:bg-gray-700 data-selected:bg-primary-50 dark:data-selected:bg-primary-900/40 data-selected:text-primary-700 dark:data-selected:text-primary-300 text-surface-700 dark:text-gray-200 transition-colors"
                     >
                       <PRSelect.OptionIndicator className="relative flex items-center justify-center opacity-0 data-selected:opacity-100">
                         <Check className="size-3.5" />
@@ -87,7 +87,7 @@ export function Select({
                 })
               }
             </PRSelect.List>
-            <PRSelect.Empty className="px-3 py-2 text-sm text-surface-400">No results found</PRSelect.Empty>
+            <PRSelect.Empty className="px-3 py-2 text-sm text-surface-400 dark:text-gray-500">No results found</PRSelect.Empty>
           </PRSelect.Popup>
         </PRSelect.Positioner>
       </PRSelect.Portal>

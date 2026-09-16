@@ -90,13 +90,13 @@ export default function UsersPage() {
     <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader title="Users" actions={<Button label="Add User" icon="pi pi-plus" onClick={openCreate} />} />
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
         <DataTable value={users} emptyMessage={<EmptyState icon="pi-user-edit" title="No users yet" />}>
           <Column field="name" header="Name" />
           <Column field="email" header="Email" />
           <Column header="Role" body={(u) => <span className="text-xs font-medium px-2 py-1 rounded-full bg-violet-50 text-violet-600">{u.role}</span>} />
           <Column header="Stores" body={(u) => (u.role === "ADMIN" ? "All" : u.storeIds.length)} />
-          <Column header="Status" body={(u) => (u.active ? <span className="text-emerald-600 text-xs font-medium">Active</span> : <span className="text-gray-400 text-xs">Inactive</span>)} />
+          <Column header="Status" body={(u) => (u.active ? <span className="text-emerald-600 text-xs font-medium">Active</span> : <span className="text-gray-400 dark:text-gray-500 text-xs">Inactive</span>)} />
           <Column
             header="Actions"
             body={(u) => (

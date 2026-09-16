@@ -16,12 +16,12 @@ export function DatePicker({ value, onChange, placeholder, showIcon = false, dat
     >
       <PRDatePicker.Input
         placeholder={placeholder}
-        className="w-full rounded-md border border-surface-300 hover:border-surface-400 focus:border-primary! bg-surface-0 text-sm text-surface-700 placeholder:text-surface-400 py-1.5 px-2.5 outline-none transition-colors"
+        className="w-full rounded-md border border-surface-300 dark:border-gray-600 hover:border-surface-400 dark:hover:border-gray-500 focus:border-primary! bg-surface-0 dark:bg-gray-800 text-sm text-surface-700 dark:text-gray-200 placeholder:text-surface-400 dark:placeholder:text-gray-500 py-1.5 px-2.5 outline-none transition-colors"
       />
-      {showIcon && <CalendarIcon className="size-3.5 text-surface-400 absolute right-2.5 pointer-events-none" />}
+      {showIcon && <CalendarIcon className="size-3.5 text-surface-400 dark:text-gray-500 absolute right-2.5 pointer-events-none" />}
       <PRDatePicker.Portal>
         <PRDatePicker.Positioner>
-          <PRDatePicker.Popup className="rounded-md bg-surface-0 border border-surface-200 text-surface-700 shadow-md p-2 data-enter-from:opacity-0 data-enter-from:scale-95 data-leave-to:opacity-0 data-leave-to:scale-95 transition-[opacity,scale] duration-150 ease-out">
+          <PRDatePicker.Popup className="rounded-md bg-surface-0 dark:bg-gray-800 border border-surface-200 dark:border-gray-700 text-surface-700 dark:text-gray-200 shadow-md p-2 data-enter-from:opacity-0 data-enter-from:scale-95 data-leave-to:opacity-0 data-leave-to:scale-95 transition-[opacity,scale] duration-150 ease-out">
             <PRDatePicker.Panel>
               <PRDatePicker.Calendar />
             </PRDatePicker.Panel>

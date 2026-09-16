@@ -78,9 +78,9 @@ export default function StockAdjustmentsPage() {
           Select a specific store from the top bar to record a stock adjustment.
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 mb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4 mb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
           <div className="lg:col-span-2">
-            <label className="text-sm font-medium text-gray-700 block mb-1">Product</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Product</label>
             <Dropdown optionValue="value"
               value={productId}
               options={products.map((p) => ({ label: `${p.name} (${p.stock} in stock)`, value: p.id }))}
@@ -91,25 +91,25 @@ export default function StockAdjustmentsPage() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">Type</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Type</label>
             <Dropdown optionValue="value" value={type} options={TYPE_OPTIONS} onChange={(e) => setType(e.value)} className="w-full" />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">{type === "ADJUSTMENT" ? "New Quantity" : "Quantity"}</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">{type === "ADJUSTMENT" ? "New Quantity" : "Quantity"}</label>
             <InputNumber value={quantity} onValueChange={(e) => setQuantity(e.value || 0)} min={0} className="w-full" />
           </div>
           <div>
             <Button label="Apply" className="w-full" loading={saving} onClick={handleSubmit} />
           </div>
           <div className="sm:col-span-2 lg:col-span-5">
-            <label className="text-sm font-medium text-gray-700 block mb-1">Reason (optional)</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Reason (optional)</label>
             <InputTextarea value={reason} onChange={(e) => setReason(e.target.value)} rows={1} className="w-full" />
           </div>
         </div>
       )}
 
-      <h3 className="text-sm font-semibold text-gray-700 mb-2">History</h3>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">History</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
         <DataTable
           value={history.data}
           loading={loadingHistory}

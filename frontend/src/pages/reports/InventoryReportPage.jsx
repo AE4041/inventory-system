@@ -46,7 +46,7 @@ export default function InventoryReportPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
         <DataTable value={result?.items || []} loading={loading} paginator rows={20} emptyMessage={<EmptyState icon="pi-box" title="No inventory records" />}>
           {isAllStores && <Column header="Store" body={(r) => r.storeName} />}
           <Column header="Product" body={(r) => r.productName} />

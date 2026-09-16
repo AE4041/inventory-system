@@ -105,9 +105,9 @@ export default function MikrotikIntegrationPage() {
     <div className="mx-auto w-full max-w-7xl px-5 space-y-6">
       <PageHeader title="MikroTik Voucher Integration" subtitle="Connect each router's hotspot voucher sales to this store's inventory and reports." />
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-1">1. Store Token</h3>
-        <p className="text-xs text-gray-500 mb-3">Each store/router needs its own token, used by the router's scripts to authenticate with the API.</p>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">1. Store Token</h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Each store/router needs its own token, used by the router's scripts to authenticate with the API.</p>
 
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <Dropdown
@@ -134,31 +134,31 @@ export default function MikrotikIntegrationPage() {
         )}
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-1">2. Endpoints for your router scripts</h3>
-        <p className="text-xs text-gray-500 mb-3">
-          Append <code className="bg-gray-100 px-1 rounded">?token=YOUR_STORE_TOKEN</code> to each URL. Replace the domain if this app is deployed somewhere other than where you're viewing it right now.
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">2. Endpoints for your router scripts</h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+          Append <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">?token=YOUR_STORE_TOKEN</code> to each URL. Replace the domain if this app is deployed somewhere other than where you're viewing it right now.
         </p>
-        <div className="space-y-1.5 font-mono text-xs bg-gray-50 rounded-lg p-3 border border-gray-100">
-          <p><span className="text-gray-400">redeemed:</span> POST {API_BASE}/integrations/mikrotik/vouchers/redeemed</p>
-          <p><span className="text-gray-400">close-day:</span> POST {API_BASE}/integrations/mikrotik/vouchers/close-day</p>
+        <div className="space-y-1.5 font-mono text-xs bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
+          <p><span className="text-gray-400 dark:text-gray-500">redeemed:</span> POST {API_BASE}/integrations/mikrotik/vouchers/redeemed</p>
+          <p><span className="text-gray-400 dark:text-gray-500">close-day:</span> POST {API_BASE}/integrations/mikrotik/vouchers/close-day</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4">
         <div className="flex items-center justify-between mb-1">
-          <h3 className="text-sm font-semibold text-gray-700">3. Profile → Product Mapping</h3>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">3. Profile → Product Mapping</h3>
           <Button label="Close Today's Vouchers Now" icon="pi pi-check-circle" size="small" text loading={closingDay} onClick={handleCloseDayNow} />
         </div>
-        <p className="text-xs text-gray-500 mb-3">Map each MikroTik hotspot profile name to a product, so a redemption knows what it sold.</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Map each MikroTik hotspot profile name to a product, so a redemption knows what it sold.</p>
 
         <div className="flex flex-wrap items-end gap-2 mb-4">
           <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Profile Name (exact)</label>
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-300 block mb-1">Profile Name (exact)</label>
             <InputText value={profileName} onChange={(e) => setProfileName(e.target.value)} placeholder="e.g. 24hours" className="w-40" />
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Product</label>
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-300 block mb-1">Product</label>
             <Dropdown
               value={productId}
               options={products.map((p) => ({ label: p.name, value: p.id }))}

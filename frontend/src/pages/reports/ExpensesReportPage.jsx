@@ -65,8 +65,8 @@ export default function ExpensesReportPage() {
             <StatCard label="Number of Expenses" value={result.summary.count} icon="pi-list" accent="gray" />
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 mb-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Expenses by Category</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4 mb-5">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Expenses by Category</h3>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={result.summary.byCategory}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -80,7 +80,7 @@ export default function ExpensesReportPage() {
         </>
       )}
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
         <DataTable value={result?.expenses || []} loading={loading} paginator rows={20} emptyMessage={<EmptyState icon="pi-money-bill" title="No expenses for this filter" />}>
           <Column header="Date" body={(e) => formatDate(e.date)} />
           <Column header="Store" body={(e) => e.store?.name} />

@@ -119,7 +119,7 @@ export default function ExpensesPage() {
         <StatCard label="Total (this filter)" value={formatCurrency(total, currency)} icon="pi-money-bill" accent="red" />
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
         <DataTable
           value={rows.data}
           loading={loading}

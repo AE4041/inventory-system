@@ -36,11 +36,11 @@ export default function LoginPage() {
       title="Welcome back"
       subtitle="Sign in to manage your stores"
       footer={
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-card px-4 py-3 text-center">
-          <p className="text-sm text-gray-500">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card px-4 py-3 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             New business? <Link to="/register" className="text-violet-600 font-medium">Create an account</Link>
           </p>
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
             Demo: admin@demo.com &middot; manager@demo.com &middot; cashier@demo.com (password: password123)
           </p>
         </div>
@@ -48,11 +48,11 @@ export default function LoginPage() {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
           <InputText value={email} onChange={(e) => setEmail(e.target.value)} className="w-full" type="email" autoFocus required />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
           <Password
             value={password}
             onChange={(e) => setPassword(e.target.value)}

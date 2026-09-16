@@ -95,7 +95,7 @@ export default function SalesReportPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
         <DataTable value={result?.sales || []} loading={loading} paginator rows={20} emptyMessage={<EmptyState icon="pi-receipt" title="No sales for this filter" />}>
           <Column field="receiptNumber" header="Receipt #" />
           <Column header="Date" body={(s) => formatDateTime(s.createdAt)} />

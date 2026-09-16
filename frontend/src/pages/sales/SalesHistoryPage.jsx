@@ -105,7 +105,7 @@ export default function SalesHistoryPage({ fixedStatus }) {
         }
       />
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
         <DataTable
           value={rows.data}
           loading={loading}
@@ -174,7 +174,7 @@ export default function SalesHistoryPage({ fixedStatus }) {
       <ReceiptDialog sale={viewingSale} visible={!!viewingSale} onHide={() => setViewingSale(null)} />
 
       <Dialog header={actionDialog?.type === "refund" ? "Refund Sale" : "Cancel Sale"} visible={!!actionDialog} onHide={() => setActionDialog(null)} style={{ width: "24rem" }}>
-        <p className="text-sm text-gray-500 mb-2">Optional reason (visible in inventory history)</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Optional reason (visible in inventory history)</p>
         <InputTextarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} className="w-full mb-3" />
         <Button label="Confirm" className="w-full" severity={actionDialog?.type === "refund" ? "warning" : "danger"} onClick={submitAction} />
       </Dialog>

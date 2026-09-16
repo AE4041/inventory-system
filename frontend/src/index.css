@@ -84,6 +84,40 @@
   --shadow-card: 0 1px 3px 0 rgb(15 23 42 / 0.06), 0 1px 2px -1px rgb(15 23 42 / 0.04);
 }
 
+/* Dark mode: PrimeReact's own compound components already ship dark: variants for
+   surfaces/borders (e.g. "bg-surface-0 dark:bg-surface-900") — the --p-surface-* scale
+   itself stays the same fixed light-to-dark ramp in both modes, components just pick a
+   different shade class per mode. Only the tokens that are used directly as bare
+   utilities everywhere (bg-primary, text-primary, the highlight/text tokens) need a
+   dark-mode override here, same pattern PrimeReact's own generated theme uses. */
+.dark {
+  color-scheme: dark;
+
+  --p-primary-color: var(--p-primary-400);
+  --p-primary-contrast-color: var(--p-surface-900);
+  --p-primary-hover-color: var(--p-primary-300);
+  --p-primary-active-color: var(--p-primary-200);
+  --p-content-border-color: var(--p-surface-700);
+  --p-content-hover-background: var(--p-surface-800);
+  --p-content-hover-color: var(--p-surface-0);
+  --p-highlight-background: color-mix(in srgb, var(--p-primary-400), transparent 84%);
+  --p-highlight-color: var(--p-primary-300);
+  --p-highlight-focus-background: color-mix(in srgb, var(--p-primary-400), transparent 76%);
+  --p-highlight-focus-color: var(--p-primary-200);
+  --p-text-color: var(--p-surface-100);
+  --p-text-hover-color: var(--p-surface-0);
+  --p-text-muted-color: var(--p-surface-400);
+  --p-text-hover-muted-color: var(--p-surface-300);
+
+  --color-sidebar: var(--p-surface-900);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+}
+
+.dark body {
+  background-color: var(--p-surface-950);
+  color: var(--p-surface-100);
+}
+
 html,
 body,
 #root {

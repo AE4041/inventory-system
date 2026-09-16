@@ -43,7 +43,7 @@ export default function SettingsPage() {
     <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader title="Settings" />
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card max-w-2xl overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card max-w-2xl overflow-hidden">
         <Tabs defaultValue="business">
           <TabsList>
             <TabsTab value="business">Business Settings</TabsTab>
@@ -55,13 +55,13 @@ export default function SettingsPage() {
             <TabsPanel value="business">
               <div className="space-y-4 max-w-sm pt-2">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">Business Name</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Business Name</label>
                   <InputText value={form.name} onChange={(e) => update("name", e.target.value)} className="w-full" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">Currency Code</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Currency Code</label>
                   <InputText value={form.currency} onChange={(e) => update("currency", e.target.value.toUpperCase())} className="w-full" maxLength={6} />
-                  <p className="text-xs text-gray-400 mt-1">e.g. GHS, USD, NGN, KES</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">e.g. GHS, USD, NGN, KES</p>
                 </div>
                 <Button label="Save Changes" loading={saving} onClick={handleSave} />
               </div>
@@ -70,16 +70,16 @@ export default function SettingsPage() {
             <TabsPanel value="tax">
               <div className="space-y-4 max-w-sm pt-2">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">Sales Tax Rate (%)</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Sales Tax Rate (%)</label>
                   <InputNumber value={form.taxRate} onValueChange={(e) => update("taxRate", e.value || 0)} suffix="%" min={0} max={100} className="w-full" />
-                  <p className="text-xs text-gray-400 mt-1">Applied automatically to every new sale, after discounts.</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Applied automatically to every new sale, after discounts.</p>
                 </div>
                 <Button label="Save Changes" loading={saving} onClick={handleSave} />
               </div>
             </TabsPanel>
 
             <TabsPanel value="receipt">
-              <div className="pt-2 text-sm text-gray-600 space-y-2 max-w-sm">
+              <div className="pt-2 text-sm text-gray-600 dark:text-gray-300 space-y-2 max-w-sm">
                 <p>Receipts automatically include your business name, store details, receipt number, items, totals, and payment method.</p>
                 <p>Store contact details (address, phone, email) come from each store's profile under <span className="font-medium">Stores</span>.</p>
               </div>
@@ -87,7 +87,7 @@ export default function SettingsPage() {
 
             <TabsPanel value="payment">
               <div className="pt-2">
-                <p className="text-sm text-gray-600 mb-3">Payment methods available at checkout:</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">Payment methods available at checkout:</p>
                 <div className="flex flex-wrap gap-2">
                   {PAYMENT_METHODS.map((m) => (
                     <span key={m} className="text-xs font-medium px-3 py-1.5 rounded-full bg-violet-50 text-violet-600">{m}</span>

@@ -72,13 +72,13 @@ export default function StoresPage() {
     <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader title="Stores" actions={<Button label="Add Store" icon="pi pi-plus" onClick={openCreate} />} />
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
         <DataTable value={stores} emptyMessage={<EmptyState icon="pi-building-columns" title="No stores yet" subtitle="Add your first branch to get started." />}>
           <Column field="name" header="Name" />
           <Column header="Address" body={(s) => s.address || "-"} />
           <Column header="Phone" body={(s) => s.phone || "-"} />
           <Column header="Email" body={(s) => s.email || "-"} />
-          <Column header="Status" body={(s) => (s.active ? <span className="text-emerald-600 text-xs font-medium">Active</span> : <span className="text-gray-400 text-xs">Inactive</span>)} />
+          <Column header="Status" body={(s) => (s.active ? <span className="text-emerald-600 text-xs font-medium">Active</span> : <span className="text-gray-400 dark:text-gray-500 text-xs">Inactive</span>)} />
           <Column
             header="Actions"
             body={(s) => (
@@ -105,7 +105,7 @@ export default function StoresPage() {
           <InputText placeholder="Phone" value={form.phone} onChange={(e) => update("phone", e.target.value)} className="w-full" />
           <InputText placeholder="Email" value={form.email} onChange={(e) => update("email", e.target.value)} className="w-full" />
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Active</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Active</span>
             <ToggleButton checked={form.active} onChange={(e) => update("active", e.value)} onLabel="Active" offLabel="Inactive" />
           </div>
           <Button label="Save Store" className="w-full" loading={saving} onClick={handleSave} disabled={!form.name} />

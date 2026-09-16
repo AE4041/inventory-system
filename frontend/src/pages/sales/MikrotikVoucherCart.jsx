@@ -92,12 +92,12 @@ export default function MikrotikVoucherCart({ storeId, currency }) {
   const items = summary?.items || [];
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-card flex flex-col mx-auto w-full max-w-7xl px-5">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card flex flex-col mx-auto w-full max-w-7xl px-5">
       <ConfirmDialog />
-      <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+      <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
         <div>
-          <p className="font-semibold text-gray-900">Today's MikroTik Vouchers</p>
-          <p className="text-xs text-gray-400">Waiting to be closed out into today's sale</p>
+          <p className="font-semibold text-gray-900 dark:text-white">Today's MikroTik Vouchers</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">Waiting to be closed out into today's sale</p>
         </div>
         <div className="flex items-center gap-2">
           <Button icon="pi pi-refresh" text rounded onClick={load} loading={loading} tooltip="Refresh" />
@@ -112,9 +112,9 @@ export default function MikrotikVoucherCart({ storeId, currency }) {
         </div>
       )}
 
-      <div className="flex-1 divide-y divide-gray-100">
+      <div className="flex-1 divide-y divide-gray-100 dark:divide-gray-700">
         {!loading && items.length === 0 && (
-          <p className="text-center text-gray-400 text-sm py-10">No vouchers redeemed yet today</p>
+          <p className="text-center text-gray-400 dark:text-gray-500 text-sm py-10">No vouchers redeemed yet today</p>
         )}
         {items.map((item) => {
           const expanded = expandedProductId === item.productId;
@@ -122,22 +122,22 @@ export default function MikrotikVoucherCart({ storeId, currency }) {
             <div key={item.productId}>
               <button
                 onClick={() => setExpandedProductId(expanded ? null : item.productId)}
-                className="w-full p-3 flex items-center gap-2 text-left hover:bg-gray-50"
+                className="w-full p-3 flex items-center gap-2 text-left hover:bg-gray-50 dark:hover:bg-gray-900/50"
               >
-                <Icon className={`${expanded ? "pi-chevron-down" : "pi-chevron-right"} text-xs text-gray-400`} />
+                <Icon className={`${expanded ? "pi-chevron-down" : "pi-chevron-right"} text-xs text-gray-400 dark:text-gray-500`} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-800 truncate">{item.productName}</p>
-                  <p className="text-xs text-gray-400">{formatCurrency(item.unitPrice, currency)} each</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">{formatCurrency(item.unitPrice, currency)} each</p>
                 </div>
-                <span className="text-sm text-gray-500 w-14 text-right">x{item.quantity}</span>
-                <span className="text-sm font-semibold text-gray-900 w-24 text-right">{formatCurrency(item.total, currency)}</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400 w-14 text-right">x{item.quantity}</span>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white w-24 text-right">{formatCurrency(item.total, currency)}</span>
               </button>
               {expanded && (
-                <div className="bg-gray-50 px-3 pb-2">
+                <div className="bg-gray-50 dark:bg-gray-900/50 px-3 pb-2">
                   {item.redemptions.map((r) => (
                     <div key={r.id} className="flex items-center gap-2 py-1.5 pl-6 text-xs">
-                      <span className="flex-1 text-gray-600 font-mono">{r.voucherCode || "(manually added)"}</span>
-                      <span className="text-gray-400">{formatTime(r.redeemedAt)}</span>
+                      <span className="flex-1 text-gray-600 dark:text-gray-300 font-mono">{r.voucherCode || "(manually added)"}</span>
+                      <span className="text-gray-400 dark:text-gray-500">{formatTime(r.redeemedAt)}</span>
                       <button onClick={() => handleRemove(r, item.productName)} className="text-gray-300 hover:text-red-500">
                         <Icon className="pi-trash" />
                       </button>
@@ -150,12 +150,12 @@ export default function MikrotikVoucherCart({ storeId, currency }) {
         })}
       </div>
 
-      <div className="p-4 border-t border-gray-100 space-y-2">
-        <div className="flex items-center justify-between text-lg font-bold text-gray-900">
+      <div className="p-4 border-t border-gray-100 dark:border-gray-700 space-y-2">
+        <div className="flex items-center justify-between text-lg font-bold text-gray-900 dark:text-white">
           <span>Grand Total</span>
           <span>{formatCurrency(summary?.grandTotal || 0, currency)}</span>
         </div>
-        <p className="text-xs text-gray-400 text-center pt-1">
+        <p className="text-xs text-gray-400 dark:text-gray-500 text-center pt-1">
           This is a preview only — vouchers are closed out automatically at end of day (router trigger or the daily backup job), or manually from{" "}
           <Link to="/settings/mikrotik" className="text-violet-600 hover:underline">Settings → MikroTik Integration</Link>.
         </p>
@@ -171,7 +171,7 @@ export default function MikrotikVoucherCart({ storeId, currency }) {
             className="w-full"
           />
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500">Quantity</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Quantity</span>
             <InputNumber value={addForm.quantity} onValueChange={(e) => setAddForm((f) => ({ ...f, quantity: e.value }))} showButtons min={1} max={500} className="w-32" inputClassName="w-10 text-center" />
           </div>
           <InputText placeholder="Note (optional)" value={addForm.note} onChange={(e) => setAddForm((f) => ({ ...f, note: e.target.value }))} className="w-full" />

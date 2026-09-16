@@ -27,7 +27,7 @@ export default function CustomerDetailPage() {
 
   if (!customer) {
     return (
-      <div className="py-20 text-center text-gray-400">
+      <div className="py-20 text-center text-gray-400 dark:text-gray-500">
         <Spinner className="animate-spin size-7" />
       </div>
     );
@@ -47,11 +47,11 @@ export default function CustomerDetailPage() {
         <StatCard label="Last Purchase" value={customer.stats.lastPurchase ? formatDateTime(customer.stats.lastPurchase) : "Never"} icon="pi-calendar" accent="gray" />
       </div>
 
-      {customer.address && <p className="text-sm text-gray-500 mb-2">Address: {customer.address}</p>}
-      {customer.notes && <p className="text-sm text-gray-500 mb-4">Notes: {customer.notes}</p>}
+      {customer.address && <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Address: {customer.address}</p>}
+      {customer.notes && <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Notes: {customer.notes}</p>}
 
-      <h3 className="text-sm font-semibold text-gray-700 mb-2">Purchase History</h3>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Purchase History</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
         <DataTable value={customer.purchaseHistory} paginator rows={10} emptyMessage={<EmptyState icon="pi-shopping-bag" title="No purchases yet" />}>
           <Column field="receiptNumber" header="Receipt #" />
           <Column header="Date" body={(s) => formatDateTime(s.createdAt)} />

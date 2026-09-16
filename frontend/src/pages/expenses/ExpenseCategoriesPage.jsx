@@ -48,12 +48,12 @@ export default function ExpenseCategoriesPage() {
     <div className="mx-auto w-full max-w-7xl px-5">
       <PageHeader title="Expense Categories" />
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 mb-5 flex gap-2 max-w-md">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4 mb-5 flex gap-2 max-w-md">
         <InputText value={name} onChange={(e) => setName(e.target.value)} placeholder="New category name" className="flex-1" onKeyDown={(e) => e.key === "Enter" && handleAdd()} />
         <Button label="Add" icon="pi pi-plus" loading={saving} onClick={handleAdd} />
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto max-w-md">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto max-w-md">
         <DataTable value={categories} emptyMessage={<EmptyState icon="pi-tags" title="No expense categories yet" />}>
           <Column field="name" header="Name" />
           <Column header="" body={(c) => <Button icon="pi pi-trash" text rounded severity="danger" onClick={() => handleDelete(c)} />} />

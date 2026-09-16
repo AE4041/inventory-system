@@ -31,7 +31,7 @@ export function ConfirmDialog() {
     <Dialog header={state.header} visible={!!state} onHide={() => setState(null)} style={{ width: "24rem" }}>
       <div className="flex items-start gap-3">
         {state.icon && <ExclamationTriangle className="size-5 text-amber-500 shrink-0 mt-0.5" />}
-        <p className="text-sm text-surface-600">{state.message}</p>
+        <p className="text-sm text-surface-600 dark:text-gray-300">{state.message}</p>
       </div>
       <div className="flex justify-end gap-2 mt-4">
         <Button variant="text" severity="secondary" size="small" onClick={() => setState(null)}>

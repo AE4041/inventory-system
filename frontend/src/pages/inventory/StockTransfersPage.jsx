@@ -89,17 +89,17 @@ export default function StockTransfersPage() {
       <ConfirmDialog />
       <PageHeader title="Stock Transfers" subtitle="Move inventory between stores" />
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 mb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4 mb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
         <div>
-          <label className="text-sm font-medium text-gray-700 block mb-1">From Store</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">From Store</label>
           <Dropdown optionValue="value" value={sourceStoreId} options={storeOptions.filter((s) => s.value !== destinationStoreId)} onChange={(e) => setSourceStoreId(e.value)} className="w-full" placeholder="Source" />
         </div>
         <div>
-          <label className="text-sm font-medium text-gray-700 block mb-1">To Store</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">To Store</label>
           <Dropdown optionValue="value" value={destinationStoreId} options={storeOptions.filter((s) => s.value !== sourceStoreId)} onChange={(e) => setDestinationStoreId(e.value)} className="w-full" placeholder="Destination" />
         </div>
         <div>
-          <label className="text-sm font-medium text-gray-700 block mb-1">Product</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Product</label>
           <Dropdown optionValue="value"
             value={productId}
             options={products.map((p) => ({ label: `${p.name} (${p.stock} available)`, value: p.id }))}
@@ -111,7 +111,7 @@ export default function StockTransfersPage() {
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-gray-700 block mb-1">Quantity</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Quantity</label>
           <InputNumber value={quantity} onValueChange={(e) => setQuantity(e.value || 1)} min={1} className="w-full" />
         </div>
         <div>
@@ -119,7 +119,7 @@ export default function StockTransfersPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
         <DataTable
           value={rows.data}
           loading={loading}

@@ -43,20 +43,20 @@ export function InputNumber({
       {...rest}
     >
       {showButtons && buttonLayout === "horizontal" && (
-        <PRInputNumber.Decrement className="inline-flex items-center justify-center px-2 rounded-l-md border border-r-0 border-surface-300 bg-surface-50 hover:bg-surface-100 text-surface-500">
+        <PRInputNumber.Decrement className="inline-flex items-center justify-center px-2 rounded-l-md border border-r-0 border-surface-300 dark:border-gray-600 bg-surface-50 dark:bg-gray-700 hover:bg-surface-100 dark:hover:bg-gray-600 text-surface-500 dark:text-gray-300">
           <ChevronDown className="size-3.5" />
         </PRInputNumber.Decrement>
       )}
       <PRInputNumber.Input
         placeholder={placeholder}
         className={cn(
-          "rounded-md border border-surface-300 hover:border-surface-400 focus-visible:border-primary! bg-surface-0 text-sm text-surface-700 py-1.5 px-2.5 outline-none transition-colors",
+          "rounded-md border border-surface-300 dark:border-gray-600 hover:border-surface-400 dark:hover:border-gray-500 focus-visible:border-primary! bg-surface-0 dark:bg-gray-800 text-sm text-surface-700 dark:text-gray-200 py-1.5 px-2.5 outline-none transition-colors",
           showButtons && buttonLayout === "horizontal" && "rounded-none text-center flex-auto",
           inputClassName
         )}
       />
       {showButtons && buttonLayout === "horizontal" && (
-        <PRInputNumber.Increment className="inline-flex items-center justify-center px-2 rounded-r-md border border-l-0 border-surface-300 bg-surface-50 hover:bg-surface-100 text-surface-500">
+        <PRInputNumber.Increment className="inline-flex items-center justify-center px-2 rounded-r-md border border-l-0 border-surface-300 dark:border-gray-600 bg-surface-50 dark:bg-gray-700 hover:bg-surface-100 dark:hover:bg-gray-600 text-surface-500 dark:text-gray-300">
           <ChevronUp className="size-3.5" />
         </PRInputNumber.Increment>
       )}

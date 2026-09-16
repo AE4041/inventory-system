@@ -53,7 +53,7 @@ export default function DashboardPage() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 flex items-center gap-4">
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4 flex items-center gap-4">
                 <Skeleton shape="circle" size="2.75rem" />
                 <div className="flex-1">
                   <Skeleton width="70%" height="0.7rem" className="mb-2" />
@@ -63,11 +63,11 @@ export default function DashboardPage() {
             ))}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-card p-4">
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4">
               <Skeleton width="40%" height="0.9rem" className="mb-4" />
               <Skeleton height="240px" borderRadius="7px" />
             </div>
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4">
               <Skeleton width="60%" height="0.9rem" className="mb-4" />
               <Skeleton height="240px" borderRadius="7px" />
             </div>
@@ -98,7 +98,7 @@ export default function DashboardPage() {
                   <ChartLine className="size-4" />
                 </div>
               </div>
-              <p className="text-xl font-bold text-gray-900 mt-3">{formatCurrency(data.sales.totalSales, currency)}</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white mt-3">{formatCurrency(data.sales.totalSales, currency)}</p>
               {data.salesOverTime?.length > 1 && (
                 <div className="h-10 -mx-2 -mb-1 mt-1">
                   <ResponsiveContainer width="100%" height="100%">
@@ -117,7 +117,7 @@ export default function DashboardPage() {
                   <Wallet className="size-4" />
                 </div>
               </div>
-              <p className="text-xl font-bold text-gray-900 mt-3">{formatCurrency(data.netRevenue, currency)}</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white mt-3">{formatCurrency(data.netRevenue, currency)}</p>
               <p className="text-xs text-teal-700/70 mt-1">{data.sales.transactions} transaction{data.sales.transactions === 1 ? "" : "s"}</p>
             </div>
           </div>
@@ -132,8 +132,8 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-card p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Sales Over Time</h3>
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Sales Over Time</h3>
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={data.salesOverTime}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -145,8 +145,8 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Sales by Payment Method</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Sales by Payment Method</h3>
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie data={data.paymentBreakdown} dataKey="total" nameKey="paymentMethod" innerRadius={55} outerRadius={90} paddingAngle={2}>
@@ -163,8 +163,8 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {data.storeComparison && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Store Comparison</h3>
+              <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Store Comparison</h3>
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={data.storeComparison}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -180,10 +180,10 @@ export default function DashboardPage() {
               </div>
             )}
 
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Top Selling Products</h3>
-              <div className="divide-y divide-gray-100">
-                {data.topProducts.length === 0 && <p className="text-sm text-gray-400 py-6 text-center">No sales in this period</p>}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Top Selling Products</h3>
+              <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                {data.topProducts.length === 0 && <p className="text-sm text-gray-400 dark:text-gray-500 py-6 text-center">No sales in this period</p>}
                 {data.topProducts.map((p, i) => (
                   <div key={p.productId} className="flex items-center justify-between py-2.5">
                     <div className="flex items-center gap-3 min-w-0">
@@ -193,8 +193,8 @@ export default function DashboardPage() {
                       <span className="text-sm text-gray-800 truncate">{p.productName}</span>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-medium text-gray-900">{formatCurrency(p.revenue, currency)}</p>
-                      <p className="text-xs text-gray-400">{p.quantitySold} sold</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">{formatCurrency(p.revenue, currency)}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{p.quantitySold} sold</p>
                     </div>
                   </div>
                 ))}

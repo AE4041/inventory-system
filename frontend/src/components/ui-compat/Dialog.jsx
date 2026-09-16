@@ -14,14 +14,14 @@ export function Dialog({ header, visible, onHide, style, className, children }) 
           <PRDialog.Popup
             style={style}
             className={cn(
-              "relative flex flex-col max-h-full w-full pointer-events-auto rounded-2xl border border-surface-200 bg-surface-0 text-surface-700 shadow-lg opacity-100 scale-100 data-enter-from:opacity-0 data-enter-from:scale-95 data-leave-to:opacity-0 data-leave-to:scale-95 transition-[opacity,scale] duration-150 ease-out",
+              "relative flex flex-col max-h-full w-full pointer-events-auto rounded-2xl border border-surface-200 dark:border-gray-700 bg-surface-0 dark:bg-gray-800 text-surface-700 dark:text-gray-200 shadow-lg opacity-100 scale-100 data-enter-from:opacity-0 data-enter-from:scale-95 data-leave-to:opacity-0 data-leave-to:scale-95 transition-[opacity,scale] duration-150 ease-out",
               className
             )}
           >
             {header && (
               <PRDialog.Header className="flex items-center justify-between shrink-0 px-5 pt-5 pb-3">
-                <PRDialog.Title className="font-semibold text-base">{header}</PRDialog.Title>
-                <PRDialog.Close className="w-8 h-8 rounded-full flex items-center justify-center text-surface-400 hover:bg-surface-100 transition-colors">
+                <PRDialog.Title className="font-semibold text-base text-gray-900 dark:text-white">{header}</PRDialog.Title>
+                <PRDialog.Close className="w-8 h-8 rounded-full flex items-center justify-center text-surface-400 dark:text-gray-400 hover:bg-surface-100 dark:hover:bg-gray-700 transition-colors">
                   <Times className="size-4" />
                 </PRDialog.Close>
               </PRDialog.Header>

@@ -15,7 +15,7 @@ export function InputPassword({ toggleMask = false, feedback, className, inputCl
       <PRInputPassword
         type={toggleMask && visible ? "text" : "password"}
         className={cn(
-          "w-full rounded-md border border-surface-300 hover:border-surface-400 focus-visible:border-primary! bg-surface-0 text-sm text-surface-700 py-1.5 px-2.5 outline-none transition-colors",
+          "w-full rounded-md border border-surface-300 dark:border-gray-600 hover:border-surface-400 dark:hover:border-gray-500 focus-visible:border-primary! bg-surface-0 dark:bg-gray-800 text-sm text-surface-700 dark:text-gray-200 py-1.5 px-2.5 outline-none transition-colors",
           toggleMask && "pe-9",
           inputClassName
         )}
@@ -26,7 +26,7 @@ export function InputPassword({ toggleMask = false, feedback, className, inputCl
           type="button"
           tabIndex={-1}
           onClick={() => setVisible((v) => !v)}
-          className="absolute inset-y-0 right-0 flex items-center px-2.5 text-surface-400 hover:text-surface-600"
+          className="absolute inset-y-0 right-0 flex items-center px-2.5 text-surface-400 dark:text-gray-500 hover:text-surface-600 dark:hover:text-gray-300"
         >
           {visible ? <EyeSlash className="size-3.5" /> : <Eye className="size-3.5" />}
         </button>

@@ -50,12 +50,12 @@ export default function StockPage() {
 
       <div className="mb-3">
         <span className="relative w-full sm:w-80 block">
-          <Icon className="pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 size-3.5" />
+          <Icon className="pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 size-3.5" />
           <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filter by product name..." className="w-full pl-9" />
         </span>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
         <DataTable
           value={filtered}
           loading={loading}

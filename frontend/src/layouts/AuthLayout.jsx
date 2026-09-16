@@ -11,7 +11,7 @@ const FEATURES = [
 // larger screens, collapsing to just the form (with a small brand header) on mobile.
 export default function AuthLayout({ title, subtitle, children, footer }) {
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900">
       <div
         className="hidden lg:flex lg:w-[42%] xl:w-[38%] relative flex-col justify-between p-12 text-white overflow-hidden shrink-0"
         style={{ background: "linear-gradient(160deg, #7c3aed, #5b21b6 60%, #4c1d95)" }}
@@ -54,12 +54,12 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center gap-2.5 justify-center mb-8">
             <BrandMark size={32} />
-            <span className="font-semibold text-gray-900">InvenPOS</span>
+            <span className="font-semibold text-gray-900 dark:text-white">InvenPOS</span>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-            <h1 className="text-xl font-bold text-gray-900 text-center">{title}</h1>
-            {subtitle && <p className="text-sm text-gray-500 text-center mt-1 mb-6">{subtitle}</p>}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white text-center">{title}</h1>
+            {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-1 mb-6">{subtitle}</p>}
             {children}
           </div>
 

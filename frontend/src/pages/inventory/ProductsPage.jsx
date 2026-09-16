@@ -175,12 +175,12 @@ export default function ProductsPage() {
 
       <div className="mb-3">
         <span className="relative w-full sm:w-80 block">
-          <Icon className="pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 size-3.5" />
+          <Icon className="pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 size-3.5" />
           <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..." className="w-full pl-9" />
         </span>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
         <DataTable
           value={products.data}
           loading={loading}
@@ -215,7 +215,7 @@ export default function ProductsPage() {
           />
           <Column field="unit" header="Unit" />
           {currentStoreId && <Column header="Stock" body={(p) => <span className={p.lowStock ? "text-amber-600 font-medium" : ""}>{p.stock}</span>} />}
-          <Column header="Status" body={(p) => (p.active ? <span className="text-emerald-600 text-xs font-medium">Active</span> : <span className="text-gray-400 text-xs">Inactive</span>)} />
+          <Column header="Status" body={(p) => (p.active ? <span className="text-emerald-600 text-xs font-medium">Active</span> : <span className="text-gray-400 dark:text-gray-500 text-xs">Inactive</span>)} />
           <Column
             header="Actions"
             body={(p) => (
@@ -234,11 +234,11 @@ export default function ProductsPage() {
       <Dialog header={editingId ? "Edit Product" : "Add Product"} visible={dialogOpen} onHide={() => setDialogOpen(false)} style={{ width: "32rem" }}>
         <div className="grid grid-cols-2 gap-3">
           <div className="col-span-2">
-            <label className="text-sm font-medium text-gray-700 block mb-1">Name</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Name</label>
             <InputText value={form.name} onChange={(e) => update("name", e.target.value)} className="w-full" />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">Category</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Category</label>
             <Dropdown optionValue="value"
               value={form.categoryId}
               options={categories.map((c) => ({ label: c.name, value: c.id }))}
@@ -249,39 +249,39 @@ export default function ProductsPage() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">Unit</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Unit</label>
             <InputText value={form.unit} onChange={(e) => update("unit", e.target.value)} className="w-full" placeholder="pcs, bottle, bag..." />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">Cost Price</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Cost Price</label>
             <InputNumber value={form.costPrice} onValueChange={(e) => update("costPrice", e.value || 0)} mode="decimal" minFractionDigits={2} className="w-full" />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">Selling Price</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Selling Price</label>
             <InputNumber value={form.sellingPrice} onValueChange={(e) => update("sellingPrice", e.value || 0)} mode="decimal" minFractionDigits={2} className="w-full" />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">Min Stock Level</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Min Stock Level</label>
             <InputNumber value={form.minStockLevel} onValueChange={(e) => update("minStockLevel", e.value || 0)} className="w-full" />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">SKU</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">SKU</label>
             <InputText value={form.sku} onChange={(e) => update("sku", e.target.value)} className="w-full" />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">Barcode</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Barcode</label>
             <InputText value={form.barcode} onChange={(e) => update("barcode", e.target.value)} className="w-full" />
           </div>
           <div className="col-span-2">
-            <label className="text-sm font-medium text-gray-700 block mb-1">Image URL (optional)</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Image URL (optional)</label>
             <InputText value={form.imageUrl} onChange={(e) => update("imageUrl", e.target.value)} className="w-full" />
           </div>
           <div className="col-span-2">
-            <label className="text-sm font-medium text-gray-700 block mb-1">Description</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Description</label>
             <InputTextarea value={form.description} onChange={(e) => update("description", e.target.value)} rows={2} className="w-full" />
           </div>
           <div className="col-span-2 flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Active</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Active</span>
             <ToggleButton checked={form.active} onChange={(e) => update("active", e.value)} onLabel="Active" offLabel="Inactive" />
           </div>
         </div>
@@ -293,14 +293,14 @@ export default function ProductsPage() {
         {priceDialogProduct && (
           <div className="space-y-3">
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">Cost Price</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Cost Price</label>
               <InputNumber value={priceForm.costPrice} onValueChange={(e) => setPriceForm((f) => ({ ...f, costPrice: e.value || 0 }))} mode="decimal" minFractionDigits={2} className="w-full" />
-              <p className="text-xs text-gray-400 mt-1">Default: {formatCurrency(priceDialogProduct.defaultCostPrice, currency)}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Default: {formatCurrency(priceDialogProduct.defaultCostPrice, currency)}</p>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">Selling Price</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Selling Price</label>
               <InputNumber value={priceForm.sellingPrice} onValueChange={(e) => setPriceForm((f) => ({ ...f, sellingPrice: e.value || 0 }))} mode="decimal" minFractionDigits={2} className="w-full" />
-              <p className="text-xs text-gray-400 mt-1">Default: {formatCurrency(priceDialogProduct.defaultSellingPrice, currency)}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Default: {formatCurrency(priceDialogProduct.defaultSellingPrice, currency)}</p>
             </div>
 
             <Button label="Save Price for This Store" className="w-full" loading={savingPrice} onClick={handleSavePrice} />

@@ -36,8 +36,8 @@ export default function ProductPerformancePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">Best Selling Products</h3>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Best Selling Products</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
             <DataTable value={result?.bestSelling || []} loading={loading} paginator rows={10} emptyMessage={<EmptyState icon="pi-star" title="No sales in this period" />}>
               <Column field="productName" header="Product" />
               <Column header="Qty Sold" body={(p) => p.quantitySold} />
@@ -47,8 +47,8 @@ export default function ProductPerformancePage() {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">Slow Moving Products (no sales this period)</h3>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-x-auto">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Slow Moving Products (no sales this period)</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto">
             <DataTable value={result?.slowMoving || []} loading={loading} paginator rows={10} emptyMessage={<EmptyState icon="pi-check-circle" title="Every active product sold at least once" />}>
               <Column field="productName" header="Product" />
               <Column header="Qty Sold" body={() => 0} />

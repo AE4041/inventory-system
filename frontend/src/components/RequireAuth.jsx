@@ -9,9 +9,9 @@ export default function RequireAuth() {
 
   if (loading) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center gap-4 bg-gray-50">
+      <div className="h-screen flex flex-col items-center justify-center gap-4 bg-gray-50 dark:bg-gray-900">
         <BrandMark size={44} />
-        <Spinner className="animate-spin size-6 text-gray-300" />
+        <Spinner className="animate-spin size-6 text-gray-300 dark:text-gray-600" />
       </div>
     );
   }

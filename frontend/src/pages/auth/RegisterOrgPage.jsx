@@ -38,8 +38,8 @@ export default function RegisterOrgPage() {
       title="Create your business"
       subtitle="Set up your organization and admin account"
       footer={
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-card px-4 py-3 text-center">
-          <p className="text-sm text-gray-500">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card px-4 py-3 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Already have an account? <Link to="/login" className="text-violet-600 font-medium">Sign in</Link>
           </p>
         </div>
@@ -47,19 +47,19 @@ export default function RegisterOrgPage() {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Business name</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business name</label>
           <InputText value={form.organizationName} onChange={(e) => update("organizationName", e.target.value)} className="w-full" autoFocus required />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Your name</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your name</label>
           <InputText value={form.adminName} onChange={(e) => update("adminName", e.target.value)} className="w-full" required />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
           <InputText type="email" value={form.email} onChange={(e) => update("email", e.target.value)} className="w-full" required />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
           <Password
             value={form.password}
             onChange={(e) => update("password", e.target.value)}
