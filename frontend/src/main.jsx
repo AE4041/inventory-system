@@ -11,7 +11,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ThemeProvider>
-      <PrimeReactProvider>
+      <PrimeReactProvider license={import.meta.env.VITE_PRIMEREACT_LICENSE}>
         <BrowserRouter>
           <ToastProvider>
             <AuthProvider>
