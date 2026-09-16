@@ -28,7 +28,6 @@ export default function NewSalePage() {
   const toast = useToast();
   const currency = user.organization?.currency || "GHS";
   const taxRate = user.organization?.taxRate || 0;
-  const canDiscount = user.role === "ADMIN" || user.role === "MANAGER";
 
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState(null);
@@ -37,7 +36,6 @@ export default function NewSalePage() {
   const [loadingProducts, setLoadingProducts] = useState(false);
 
   const [cart, setCart] = useState([]);
-  const [discount, setDiscount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("CASH");
 
   const [customers, setCustomers] = useState([]);
@@ -123,9 +121,8 @@ export default function NewSalePage() {
   }
 
   const subtotal = cart.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
-  const taxableAmount = Math.max(subtotal - discount, 0);
-  const tax = taxableAmount * (taxRate / 100);
-  const total = taxableAmount + tax;
+  const tax = subtotal * (taxRate / 100);
+  const total = subtotal + tax;
 
   async function handleCreateCustomer() {
     try {
@@ -151,13 +148,11 @@ export default function NewSalePage() {
         storeId: currentStoreId,
         customerId: customerId || undefined,
         items: cart.map((i) => ({ productId: i.productId, quantity: i.quantity, unitPrice: i.unitPrice, discount: 0 })),
-        discount,
         paymentMethod,
       });
       toast.success(`Sale completed - ${data.data.receiptNumber}`);
       setCompletedSale(data.data);
       setCart([]);
-      setDiscount(0);
       setCustomerId(null);
       setPaymentMethod("CASH");
     } catch (err) {
@@ -277,12 +272,6 @@ export default function NewSalePage() {
         </div>
 
         <div className="p-4 border-t border-gray-100 dark:border-gray-700 space-y-2">
-          {canDiscount && (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500 dark:text-gray-400">Discount</span>
-              <InputNumber value={discount} onValueChange={(e) => setDiscount(e.value || 0)} mode="decimal" minFractionDigits={2} min={0} className="w-32" inputClassName="text-right" />
-            </div>
-          )}
           <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
             <span>Subtotal</span>
             <span>{formatCurrency(subtotal, currency)}</span>
