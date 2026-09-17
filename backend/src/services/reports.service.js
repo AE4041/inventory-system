@@ -17,11 +17,11 @@ export async function getSalesSummary({ user, storeId, from, to, extraSaleWhere 
 
   const [completedAgg, completedCount, refundedAgg, cancelledCount, productsSoldAgg] = await Promise.all([
     prisma.sale.aggregate({
-      where: { ...baseWhere, status: "COMPLETED" },
+      where: { ...baseWhere, status: "PAID" },
       _sum: { total: true, discount: true, tax: true, subtotal: true },
       _count: true,
     }),
-    prisma.sale.count({ where: { ...baseWhere, status: "COMPLETED" } }),
+    prisma.sale.count({ where: { ...baseWhere, status: "PAID" } }),
     prisma.sale.aggregate({
       where: { ...baseWhere, status: "REFUNDED" },
       _sum: { total: true },
@@ -29,7 +29,7 @@ export async function getSalesSummary({ user, storeId, from, to, extraSaleWhere 
     }),
     prisma.sale.count({ where: { ...baseWhere, status: "CANCELLED" } }),
     prisma.saleItem.aggregate({
-      where: { sale: { ...baseWhere, status: "COMPLETED" } },
+      where: { sale: { ...baseWhere, status: "PAID" } },
       _sum: { quantity: true },
     }),
   ]);
@@ -106,7 +106,7 @@ export async function getTopProducts({ user, storeId, from, to, limit = 10 }) {
   const storeScope = resolveStoreScope(user, storeId);
   const grouped = await prisma.saleItem.groupBy({
     by: ["productId"],
-    where: { sale: { store: storeScope, createdAt: { gte: from, lte: to }, status: "COMPLETED" } },
+    where: { sale: { store: storeScope, createdAt: { gte: from, lte: to }, status: "PAID" } },
     _sum: { quantity: true, total: true },
     orderBy: { _sum: { total: "desc" } },
     take: limit,
@@ -127,7 +127,7 @@ export async function getSalesByPaymentMethod({ user, storeId, from, to }) {
   const storeScope = resolveStoreScope(user, storeId);
   const grouped = await prisma.sale.groupBy({
     by: ["paymentMethod"],
-    where: { store: storeScope, createdAt: { gte: from, lte: to }, status: "COMPLETED" },
+    where: { store: storeScope, createdAt: { gte: from, lte: to }, status: "PAID" },
     _sum: { total: true },
     _count: true,
   });
@@ -143,7 +143,7 @@ export async function getSalesByPaymentMethod({ user, storeId, from, to }) {
 export async function getSalesOverTime({ user, storeId, from, to }) {
   const storeScope = resolveStoreScope(user, storeId);
   const sales = await prisma.sale.findMany({
-    where: { store: storeScope, createdAt: { gte: from, lte: to }, status: "COMPLETED" },
+    where: { store: storeScope, createdAt: { gte: from, lte: to }, status: "PAID" },
     select: { total: true, createdAt: true },
   });
 

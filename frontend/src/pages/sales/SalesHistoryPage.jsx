@@ -11,6 +11,7 @@ import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
 import DateRangeFilter from "../../components/DateRangeFilter";
 import ReceiptDialog from "../../components/ReceiptDialog";
+import EditSaleItemsDialog from "./EditSaleItemsDialog";
 import { useAuth } from "../../context/AuthContext";
 import { useStore } from "../../context/StoreContext";
 import { useToast } from "../../context/ToastContext";
@@ -21,7 +22,8 @@ import { formatCurrency, formatDateTime, statusBadgeClass } from "../../utils/fo
 
 const STATUS_OPTIONS = [
   { label: "All Statuses", value: "" },
-  { label: "Completed", value: "COMPLETED" },
+  { label: "Draft", value: "DRAFT" },
+  { label: "Paid", value: "PAID" },
   { label: "Cancelled", value: "CANCELLED" },
   { label: "Refunded", value: "REFUNDED" },
 ];
@@ -42,6 +44,7 @@ export default function SalesHistoryPage({ fixedStatus }) {
   const toast = useToast();
   const currency = user.organization?.currency || "GHS";
   const canManage = user.role === "ADMIN" || user.role === "MANAGER";
+  const isAdmin = user.role === "ADMIN";
 
   const [range, setRange] = useState({ preset: "this_month" });
   const [status, setStatus] = useState(fixedStatus || "");
@@ -50,6 +53,7 @@ export default function SalesHistoryPage({ fixedStatus }) {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [viewingSale, setViewingSale] = useState(null);
+  const [editingSale, setEditingSale] = useState(null);
   const [actionDialog, setActionDialog] = useState(null); // { sale, type: 'refund' | 'cancel' }
   const [reason, setReason] = useState("");
 
@@ -73,6 +77,16 @@ export default function SalesHistoryPage({ fixedStatus }) {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [range, status, paymentMethod, currentStoreId, page]);
+
+  async function handleMarkPaid(sale) {
+    try {
+      await salesApi.markPaid(sale.id);
+      toast.success(`${sale.receiptNumber} marked as paid`);
+      load();
+    } catch (err) {
+      toast.error(apiErrorMessage(err, "Could not mark as paid"));
+    }
+  }
 
   async function submitAction() {
     try {
@@ -131,23 +145,31 @@ export default function SalesHistoryPage({ fixedStatus }) {
             body={(s) => (
               <div className="flex gap-1">
                 <Button icon="pi pi-receipt" text rounded onClick={() => setViewingSale(s)} tooltip="View receipt" />
-                {canManage && s.status === "COMPLETED" && (
+                {canManage && s.status === "DRAFT" && (
+                  <Button icon="pi pi-check" text rounded severity="success" tooltip="Mark as Paid" onClick={() => handleMarkPaid(s)} />
+                )}
+                {isAdmin && s.status === "PAID" && (
+                  <Button icon="pi pi-pencil" text rounded tooltip="Edit items" onClick={() => setEditingSale(s)} />
+                )}
+                {canManage && (s.status === "PAID" || s.status === "DRAFT") && (
                   <>
-                    <Button
-                      icon="pi pi-replay"
-                      text
-                      rounded
-                      severity="warning"
-                      tooltip="Refund"
-                      onClick={() =>
-                        confirmDialog({
-                          message: `Refund ${s.receiptNumber}? Stock will be restored.`,
-                          header: "Confirm Refund",
-                          icon: "pi pi-exclamation-triangle",
-                          accept: () => setActionDialog({ sale: s, type: "refund" }),
-                        })
-                      }
-                    />
+                    {s.status === "PAID" && (
+                      <Button
+                        icon="pi pi-replay"
+                        text
+                        rounded
+                        severity="warning"
+                        tooltip="Refund"
+                        onClick={() =>
+                          confirmDialog({
+                            message: `Refund ${s.receiptNumber}? Stock will be restored.`,
+                            header: "Confirm Refund",
+                            icon: "pi pi-exclamation-triangle",
+                            accept: () => setActionDialog({ sale: s, type: "refund" }),
+                          })
+                        }
+                      />
+                    )}
                     <Button
                       icon="pi pi-times"
                       text
@@ -172,6 +194,17 @@ export default function SalesHistoryPage({ fixedStatus }) {
       </div>
 
       <ReceiptDialog sale={viewingSale} visible={!!viewingSale} onHide={() => setViewingSale(null)} />
+
+      <EditSaleItemsDialog
+        sale={editingSale}
+        visible={!!editingSale}
+        currency={currency}
+        onHide={() => setEditingSale(null)}
+        onSaved={() => {
+          setEditingSale(null);
+          load();
+        }}
+      />
 
       <Dialog header={actionDialog?.type === "refund" ? "Refund Sale" : "Cancel Sale"} visible={!!actionDialog} onHide={() => setActionDialog(null)} style={{ width: "24rem" }}>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Optional reason (visible in inventory history)</p>

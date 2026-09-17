@@ -44,15 +44,15 @@ export const getCustomer = asyncHandler(async (req, res) => {
     include: { items: { include: { product: true } }, store: true, cashier: { select: { id: true, name: true } } },
   });
 
-  const completedSales = sales.filter((s) => s.status === "COMPLETED");
-  const totalSpent = completedSales.reduce((sum, s) => sum + Number(s.total), 0);
+  const paidSales = sales.filter((s) => s.status === "PAID");
+  const totalSpent = paidSales.reduce((sum, s) => sum + Number(s.total), 0);
 
   res.json({
     success: true,
     data: {
       ...customer,
       stats: {
-        totalTransactions: completedSales.length,
+        totalTransactions: paidSales.length,
         totalSpent,
         lastPurchase: sales[0]?.createdAt ?? null,
       },

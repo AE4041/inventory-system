@@ -2,7 +2,7 @@ import { prisma } from "../lib/prisma.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
 import { assertStoreAccess } from "../middleware/auth.js";
-import { createSale, refundSale, cancelSale } from "../services/sales.service.js";
+import { createSale, refundSale, cancelSale, markSalePaid, updateSaleItems } from "../services/sales.service.js";
 import { parsePagination, paginatedResponse } from "../utils/pagination.js";
 
 function buildSalesWhere(req) {
@@ -111,6 +111,33 @@ export const cancelSaleHandler = asyncHandler(async (req, res) => {
     saleId: req.params.id,
     userId: req.user.id,
     reason: req.body?.reason,
+  });
+  res.json({ success: true, data: sale });
+});
+
+export const markSalePaidHandler = asyncHandler(async (req, res) => {
+  const existing = await prisma.sale.findFirst({
+    where: { id: req.params.id, store: { organizationId: req.user.organizationId } },
+  });
+  if (!existing) throw ApiError.notFound("Sale not found");
+  assertStoreAccess(req.user, existing.storeId);
+
+  const sale = await markSalePaid({ organizationId: req.user.organizationId, saleId: req.params.id });
+  res.json({ success: true, data: sale });
+});
+
+export const updateSaleItemsHandler = asyncHandler(async (req, res) => {
+  const existing = await prisma.sale.findFirst({
+    where: { id: req.params.id, store: { organizationId: req.user.organizationId } },
+  });
+  if (!existing) throw ApiError.notFound("Sale not found");
+  assertStoreAccess(req.user, existing.storeId);
+
+  const sale = await updateSaleItems({
+    organizationId: req.user.organizationId,
+    saleId: req.params.id,
+    userId: req.user.id,
+    items: req.body.items,
   });
   res.json({ success: true, data: sale });
 });

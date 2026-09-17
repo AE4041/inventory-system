@@ -106,6 +106,12 @@ export const createSaleSchema = z.object({
   paymentMethod: z.enum(["CASH", "MOBILE_MONEY", "CARD", "BANK_TRANSFER", "OTHER"]),
 });
 
+// Item count/composition only — price always comes from the server (the item's own
+// unitPrice if unchanged, or the product's current effective price if newly added).
+export const updateSaleItemsSchema = z.object({
+  items: z.array(z.object({ productId: z.string(), quantity: z.coerce.number().int().positive() })).min(1),
+});
+
 export const expenseCategorySchema = z.object({
   name: z.string().min(1),
 });
