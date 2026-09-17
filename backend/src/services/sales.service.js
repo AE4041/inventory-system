@@ -6,8 +6,18 @@ import { effectivePrice } from "../utils/pricing.js";
 
 const SALE_INCLUDE = { items: { include: { product: true } }, payments: true, customer: true, store: true, cashier: { select: { id: true, name: true } } };
 
+// Refund and item-edit are only allowed within this window after a sale is marked paid —
+// old, already-settled invoices shouldn't stay mutable indefinitely.
+const EDIT_REFUND_WINDOW_MS = 6 * 60 * 60 * 1000;
+
 function round2(n) {
   return Math.round(n * 100) / 100;
+}
+
+function assertWithinEditRefundWindow(sale) {
+  if (!sale.paidAt || Date.now() - sale.paidAt.getTime() > EDIT_REFUND_WINDOW_MS) {
+    throw ApiError.badRequest("This invoice was marked paid more than 6 hours ago and can no longer be edited or refunded");
+  }
 }
 
 // Shared by createSale and updateSaleItems so the subtotal/discount/tax/total formula
@@ -118,6 +128,7 @@ export async function refundSale({ organizationId, saleId, userId, reason }) {
   });
   if (!sale) throw ApiError.notFound("Sale not found");
   if (sale.status !== "PAID") throw ApiError.badRequest("Only paid sales can be refunded");
+  assertWithinEditRefundWindow(sale);
 
   return prisma.$transaction(async (tx) => {
     for (const item of sale.items) {
@@ -180,7 +191,7 @@ export async function markSalePaid({ organizationId, saleId }) {
   if (!sale) throw ApiError.notFound("Sale not found");
   if (sale.status !== "DRAFT") throw ApiError.badRequest("Only draft sales can be marked as paid");
 
-  return prisma.sale.update({ where: { id: sale.id }, data: { status: "PAID" }, include: SALE_INCLUDE });
+  return prisma.sale.update({ where: { id: sale.id }, data: { status: "PAID", paidAt: new Date() }, include: SALE_INCLUDE });
 }
 
 // Admin correction on an already-paid invoice: `items` is the full desired line list
@@ -194,6 +205,7 @@ export async function updateSaleItems({ organizationId, saleId, userId, items })
   });
   if (!sale) throw ApiError.notFound("Sale not found");
   if (sale.status !== "PAID") throw ApiError.badRequest("Only paid invoices can be edited");
+  assertWithinEditRefundWindow(sale);
 
   const productIds = items.map((i) => i.productId);
   const [products, organization, storeProducts] = await Promise.all([

@@ -28,6 +28,14 @@ const STATUS_OPTIONS = [
   { label: "Refunded", value: "REFUNDED" },
 ];
 
+// Mirrors the backend's EDIT_REFUND_WINDOW_MS in sales.service.js — an old, already-settled
+// invoice shouldn't stay editable/refundable indefinitely. This is a UI-only convenience
+// (hides buttons that would otherwise 400); the server enforces the real cutoff.
+const EDIT_REFUND_WINDOW_MS = 6 * 60 * 60 * 1000;
+function withinEditRefundWindow(sale) {
+  return !!sale.paidAt && Date.now() - new Date(sale.paidAt).getTime() <= EDIT_REFUND_WINDOW_MS;
+}
+
 const PAYMENT_OPTIONS = [
   { label: "All Payment Methods", value: "" },
   { label: "Cash", value: "CASH" },
@@ -148,12 +156,12 @@ export default function SalesHistoryPage({ fixedStatus }) {
                 {canManage && s.status === "DRAFT" && (
                   <Button icon="pi pi-check" text rounded severity="success" tooltip="Mark as Paid" onClick={() => handleMarkPaid(s)} />
                 )}
-                {isAdmin && s.status === "PAID" && (
+                {isAdmin && s.status === "PAID" && withinEditRefundWindow(s) && (
                   <Button icon="pi pi-pencil" text rounded tooltip="Edit items" onClick={() => setEditingSale(s)} />
                 )}
                 {canManage && (s.status === "PAID" || s.status === "DRAFT") && (
                   <>
-                    {s.status === "PAID" && (
+                    {s.status === "PAID" && withinEditRefundWindow(s) && (
                       <Button
                         icon="pi pi-replay"
                         text
