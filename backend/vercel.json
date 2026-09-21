@@ -4,7 +4,7 @@
   "crons": [
     {
       "path": "/api/integrations/mikrotik/close-day-all",
-      "schedule": "10 0 * * *"
+      "schedule": "59 23 * * *"
     }
   ]
 }
