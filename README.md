@@ -172,16 +172,20 @@ different days are still pending, a later recovery run produces one correctly-da
 missed day instead of merging everything into a single lump under today's date
 (`voucherCloseOut.service.js`).
 
-**Backend-side fallback (doesn't depend on the router at all):** `backend/vercel.json` schedules a
-[Vercel Cron](https://vercel.com/docs/cron-jobs) job that hits `GET /api/integrations/mikrotik/
-close-day-all` once daily (10 minutes after midnight UTC, adjust `crons[0].schedule` if your
-stores are in a very different timezone) — every store's pending redemptions across every
-organization get closed out, whether or not the router's own script fired. Set a `CRON_SECRET` env
-var on the Vercel project (see `.env.example`); Vercel automatically sends
-`Authorization: Bearer <CRON_SECRET>` when it invokes the job, which is what
-`middleware/cronSecret.js` checks (an `X-Cron-Secret` header also works, for manual/curl testing).
-This endpoint is idempotent and safe to call anytime, on top of the router's own trigger — it only
-ever processes redemptions that haven't been booked yet.
+**Backend-side fallback (doesn't depend on the router at all):** an external scheduler at
+[cron-job.org](https://cron-job.org) hits `GET /api/integrations/mikrotik/close-day-all` once
+daily (10 minutes after midnight UTC, adjust in the cron-job.org dashboard if your stores are in a
+very different timezone) with an `X-Cron-Secret: <CRON_SECRET>` header — every store's pending
+redemptions across every organization get closed out, whether or not the router's own script
+fired. Set a `CRON_SECRET` env var on the Vercel project (see `.env.example`) and mirror the same
+value into the cron-job.org job's `X-Cron-Secret` header, which is what `middleware/cronSecret.js`
+checks. This endpoint is idempotent and safe to call anytime, on top of the router's own trigger —
+it only ever processes redemptions that haven't been booked yet.
+
+(Previously this ran on Vercel Cron, but the Hobby-plan scheduler doesn't fire precisely enough —
+switched to cron-job.org, which is free and minute-accurate. `middleware/cronSecret.js` still also
+accepts Vercel's own `Authorization: Bearer <CRON_SECRET>` header, so re-adding a `crons` block to
+`vercel.json` would work again without any code changes if ever needed.)
 On a persistent (non-serverless) deployment, `backend/src/jobs/voucherCloseOut.job.js` runs the
 same logic in-process instead — only one of the two mechanisms is meaningful depending on how you
 deploy, and it's fine to leave both configured.
