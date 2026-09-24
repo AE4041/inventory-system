@@ -190,7 +190,7 @@ export default function DashboardPage() {
                       <span className="w-6 h-6 rounded-full bg-violet-50 text-violet-600 text-xs font-semibold flex items-center justify-center shrink-0">
                         {i + 1}
                       </span>
-                      <span className="text-sm text-gray-800 truncate">{p.productName}</span>
+                      <span className="text-sm text-gray-800 dark:text-white truncate">{p.productName}</span>
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-sm font-medium text-gray-900 dark:text-white">{formatCurrency(p.revenue, currency)}</p>

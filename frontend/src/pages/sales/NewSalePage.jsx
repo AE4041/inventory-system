@@ -176,13 +176,13 @@ export default function NewSalePage() {
       <div className="flex gap-1 mb-3 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 w-fit shrink-0">
         <button
           onClick={() => setActiveTab("manual")}
-          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === "manual" ? "bg-white text-gray-900 dark:text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"}`}
+          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === "manual" ? "bg-white text-gray-900 dark:bg-gray-600 dark:text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"}`}
         >
           Manual Sale
         </button>
         <button
           onClick={() => setActiveTab("mikrotik")}
-          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === "mikrotik" ? "bg-white text-gray-900 dark:text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"}`}
+          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === "mikrotik" ? "bg-white text-gray-900 dark:bg-gray-600 dark:text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"}`}
         >
           MikroTik Vouchers
         </button>
