@@ -112,6 +112,7 @@ export const reportsApi = {
   inventory: (params) => api.get("/reports/inventory", { params }),
   products: (params) => api.get("/reports/products", { params }),
   stores: (params) => api.get("/reports/stores", { params }),
+  accountsSheet: (params) => api.get("/reports/accounts-sheet", { params }),
 };
 
 export const receiptsApi = {

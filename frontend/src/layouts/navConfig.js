@@ -42,6 +42,7 @@ export const NAV_SECTIONS = [
       { label: "Inventory", to: "/reports/inventory", icon: "pi-database" },
       { label: "Products", to: "/reports/products", icon: "pi-star" },
       { label: "Store Performance", to: "/reports/stores", icon: "pi-building" },
+      { label: "Accounts Sheet", to: "/reports/accounts-sheet", icon: "pi-calculator" },
     ],
   },
   {

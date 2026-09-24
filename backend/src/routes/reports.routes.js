@@ -7,6 +7,7 @@ import {
   productPerformanceReport,
   storePerformanceReport,
 } from "../controllers/reports.controller.js";
+import { getAccountsSheet, getAccountsSheetPdf } from "../controllers/accountsSheet.controller.js";
 
 const router = Router();
 
@@ -17,5 +18,7 @@ router.get("/expenses", expensesReport);
 router.get("/inventory", inventoryReport);
 router.get("/products", productPerformanceReport);
 router.get("/stores", storePerformanceReport);
+router.get("/accounts-sheet", getAccountsSheet);
+router.get("/accounts-sheet/pdf", getAccountsSheetPdf);
 
 export default router;

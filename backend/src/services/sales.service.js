@@ -150,7 +150,7 @@ export async function refundSale({ organizationId, saleId, userId, reason }) {
 
     return tx.sale.update({
       where: { id: sale.id },
-      data: { status: "REFUNDED" },
+      data: { status: "REFUNDED", refundedAt: new Date() },
       include: SALE_INCLUDE,
     });
   });

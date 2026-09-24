@@ -24,6 +24,7 @@ import ExpensesReportPage from "./pages/reports/ExpensesReportPage";
 import InventoryReportPage from "./pages/reports/InventoryReportPage";
 import ProductPerformancePage from "./pages/reports/ProductPerformancePage";
 import StorePerformancePage from "./pages/reports/StorePerformancePage";
+import AccountsSheetPage from "./pages/reports/AccountsSheetPage";
 import StoresPage from "./pages/stores/StoresPage";
 import UsersPage from "./pages/users/UsersPage";
 import SettingsPage from "./pages/settings/SettingsPage";
@@ -72,6 +73,7 @@ export default function App() {
               <Route path="reports/inventory" element={<InventoryReportPage />} />
               <Route path="reports/products" element={<ProductPerformancePage />} />
               <Route path="reports/stores" element={<StorePerformancePage />} />
+              <Route path="reports/accounts-sheet" element={<AccountsSheetPage />} />
             </Route>
 
             <Route element={<RequireRole roles={["ADMIN"]} />}>

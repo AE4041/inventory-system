@@ -310,6 +310,11 @@ model Sale {
   // already-settled invoices shouldn't be mutable indefinitely.
   paidAt DateTime?
 
+  // When this sale was refunded (status -> REFUNDED). Used by the Accounts Sheet report
+  // to date the "loss" row on the day the refund actually happened, not whenever the
+  // row happens to be generated.
+  refundedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
