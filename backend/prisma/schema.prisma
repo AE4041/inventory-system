@@ -92,6 +92,7 @@ model User {
   stockTransfersCreated StockTransfer[]
   sales                Sale[]
   expensesRecorded      Expense[]
+  manualSaleEntries     ManualSaleEntry[]
 
   @@index([organizationId])
 }
@@ -136,6 +137,7 @@ model Store {
   sales                 Sale[]
   expenses              Expense[]
   voucherRedemptions    VoucherRedemption[]
+  manualSaleEntries     ManualSaleEntry[]
 
   @@index([organizationId])
 }
@@ -394,6 +396,29 @@ model Expense {
   @@index([storeId])
   @@index([categoryId])
   @@index([date])
+}
+
+// A hand-entered revenue line on the Accounts Sheet report (backend/src/services/
+// accountsSheet.service.js) — for a real sale that never went through the normal POS/
+// MikroTik flow (so there's no Product/stock transaction behind it), e.g. an off-books
+// cash sale. Counts as immediately-confirmed revenue (both Receipts IN and Primary
+// Account IN on the sheet) since whoever enters it is the one confirming it — unlike a
+// normal sale, there's no separate Draft->Paid step.
+model ManualSaleEntry {
+  id          String @id @default(cuid())
+  storeId     String
+  createdById String
+
+  store     Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  createdBy User  @relation(fields: [createdById], references: [id])
+
+  date        DateTime
+  description String
+  amount      Decimal  @db.Decimal(12, 2)
+
+  createdAt DateTime @default(now())
+
+  @@index([storeId, date])
 }
 
 // ---------- MikroTik voucher integration ----------

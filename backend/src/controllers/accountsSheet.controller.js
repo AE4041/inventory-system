@@ -1,7 +1,12 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
 import { toCsv, sendCsv } from "../utils/csv.js";
-import { getAccountsSheetData, buildAccountsSheetPdf } from "../services/accountsSheet.service.js";
+import {
+  getAccountsSheetData,
+  buildAccountsSheetPdf,
+  createManualSaleEntry,
+  deleteManualSaleEntry,
+} from "../services/accountsSheet.service.js";
 
 function parseYearMonth(req) {
   const year = Number(req.query.year);
@@ -41,4 +46,15 @@ export const getAccountsSheetPdf = asyncHandler(async (req, res) => {
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
   res.send(pdfBuffer);
+});
+
+export const addManualSaleEntry = asyncHandler(async (req, res) => {
+  const { storeId, date, description, amount } = req.body;
+  const entry = await createManualSaleEntry({ user: req.user, storeId, date, description, amount });
+  res.status(201).json({ success: true, data: entry });
+});
+
+export const removeManualSaleEntry = asyncHandler(async (req, res) => {
+  const entry = await deleteManualSaleEntry({ user: req.user, entryId: req.params.id });
+  res.json({ success: true, data: { id: entry.id } });
 });

@@ -126,3 +126,10 @@ export const expenseSchema = z.object({
   attachmentUrl: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
 });
+
+export const manualSaleEntrySchema = z.object({
+  storeId: z.string(),
+  description: z.string().min(1),
+  amount: z.coerce.number().positive(),
+  date: z.coerce.date(),
+});

@@ -2,6 +2,7 @@ import PDFDocument from "pdfkit";
 import { prisma } from "../lib/prisma.js";
 import { ApiError } from "../utils/apiError.js";
 import { resolveStoreScope } from "./reports.service.js";
+import { assertStoreAccess } from "../middleware/auth.js";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -42,8 +43,13 @@ function dayLabel(date) {
 //   E — one Expense record (Primary Account OUT).
 //   L — one refunded sale (Primary Account OUT, for the refunded amount) — revenue that
 //       really was collected and confirmed, then reversed.
+// Plus hand-entered ManualSaleEntry rows (also TC S, but hitting Primary Account IN
+// directly rather than Receipts IN — see createManualSaleEntry below).
 // Cancelled sales are excluded entirely, at every stage, regardless of what status they
 // passed through before being cancelled.
+// Every row carries `id`/`source` so the frontend knows which ones it can delete:
+// "manual-sale" rows can be removed outright; "auto" (real sales/refunds) and "expense"
+// rows can't be touched from this report (expenses are managed on the Expenses page).
 export async function getAccountsSheetData({ user, storeId, year, month }) {
   if (!storeId) throw ApiError.badRequest("storeId is required");
   resolveStoreScope(user, storeId); // validates access; throws if the user can't see this store
@@ -55,7 +61,7 @@ export async function getAccountsSheetData({ user, storeId, year, month }) {
   const start = new Date(year, month - 1, 1, 0, 0, 0, 0);
   const end = new Date(year, month, 0, 23, 59, 59, 999);
 
-  const [sales, expenses] = await Promise.all([
+  const [sales, expenses, manualEntries] = await Promise.all([
     prisma.sale.findMany({
       where: {
         storeId,
@@ -69,6 +75,11 @@ export async function getAccountsSheetData({ user, storeId, year, month }) {
       select: { id: true, receiptNumber: true, total: true, createdAt: true, paidAt: true, status: true, refundedAt: true },
     }),
     prisma.expense.findMany({
+      where: { storeId, date: { gte: start, lte: end } },
+      select: { id: true, description: true, amount: true, date: true },
+      orderBy: { date: "asc" },
+    }),
+    prisma.manualSaleEntry.findMany({
       where: { storeId, date: { gte: start, lte: end } },
       select: { id: true, description: true, amount: true, date: true },
       orderBy: { date: "asc" },
@@ -95,17 +106,27 @@ export async function getAccountsSheetData({ user, storeId, year, month }) {
 
   const rows = [];
   for (const { date, total } of sByDay.values()) {
-    rows.push({ date, description: `Sales on ${dayLabel(date)}`, tc: "S", receiptsIn: round2(total), receiptsOut: 0, primaryIn: 0, primaryOut: 0 });
+    rows.push({ id: null, source: "auto", date, description: `Sales on ${dayLabel(date)}`, tc: "S", receiptsIn: round2(total), receiptsOut: 0, primaryIn: 0, primaryOut: 0 });
   }
   for (const { date, total } of pByDay.values()) {
-    rows.push({ date, description: `Sales marked paid on ${dayLabel(date)}`, tc: "P", receiptsIn: 0, receiptsOut: round2(total), primaryIn: round2(total), primaryOut: 0 });
+    rows.push({ id: null, source: "auto", date, description: `Sales marked paid on ${dayLabel(date)}`, tc: "P", receiptsIn: 0, receiptsOut: round2(total), primaryIn: round2(total), primaryOut: 0 });
   }
   for (const e of expenses) {
-    rows.push({ date: e.date, description: e.description, tc: "E", receiptsIn: 0, receiptsOut: 0, primaryIn: 0, primaryOut: round2(Number(e.amount)) });
+    rows.push({ id: e.id, source: "expense", date: e.date, description: e.description, tc: "E", receiptsIn: 0, receiptsOut: 0, primaryIn: 0, primaryOut: round2(Number(e.amount)) });
   }
   for (const s of sales) {
     if (s.status !== "REFUNDED" || !s.refundedAt || s.refundedAt < start || s.refundedAt > end) continue;
-    rows.push({ date: s.refundedAt, description: `Refund - ${s.receiptNumber}`, tc: "L", receiptsIn: 0, receiptsOut: 0, primaryIn: 0, primaryOut: round2(Number(s.total)) });
+    rows.push({ id: null, source: "auto", date: s.refundedAt, description: `Refund - ${s.receiptNumber}`, tc: "L", receiptsIn: 0, receiptsOut: 0, primaryIn: 0, primaryOut: round2(Number(s.total)) });
+  }
+  // Manual sale entries count as immediately-confirmed revenue — Primary Account IN
+  // only, not Receipts IN. They deliberately skip the Receipts columns entirely: those
+  // exist to track the gap between a real sale being drafted and later confirmed paid,
+  // which doesn't apply here (whoever enters a manual entry is confirming it on the
+  // spot). Populating Receipts IN too would create a balance nothing ever "clears" —
+  // permanently inflating Receipts Ending Balance for a sale that's already settled.
+  for (const m of manualEntries) {
+    const amount = round2(Number(m.amount));
+    rows.push({ id: m.id, source: "manual-sale", date: m.date, description: m.description, tc: "S", receiptsIn: 0, receiptsOut: 0, primaryIn: amount, primaryOut: 0 });
   }
 
   rows.sort((a, b) => {
@@ -139,6 +160,23 @@ export async function getAccountsSheetData({ user, storeId, year, month }) {
       totalFundsOnHand: primaryEnding,
     },
   };
+}
+
+export async function createManualSaleEntry({ user, storeId, date, description, amount }) {
+  assertStoreAccess(user, storeId);
+  return prisma.manualSaleEntry.create({
+    data: { storeId, createdById: user.id, date, description, amount },
+  });
+}
+
+export async function deleteManualSaleEntry({ user, entryId }) {
+  const existing = await prisma.manualSaleEntry.findFirst({
+    where: { id: entryId, store: { organizationId: user.organizationId } },
+  });
+  if (!existing) throw ApiError.notFound("Manual entry not found");
+  assertStoreAccess(user, existing.storeId);
+  await prisma.manualSaleEntry.delete({ where: { id: entryId } });
+  return existing;
 }
 
 // --- PDF rendering ---

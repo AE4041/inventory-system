@@ -113,6 +113,8 @@ export const reportsApi = {
   products: (params) => api.get("/reports/products", { params }),
   stores: (params) => api.get("/reports/stores", { params }),
   accountsSheet: (params) => api.get("/reports/accounts-sheet", { params }),
+  addManualSaleEntry: (data) => api.post("/reports/accounts-sheet/manual-entries", data),
+  removeManualSaleEntry: (id) => api.delete(`/reports/accounts-sheet/manual-entries/${id}`),
 };
 
 export const receiptsApi = {

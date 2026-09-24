@@ -57,7 +57,10 @@ export function DataTable({
                   {columns.map((col, i) => (
                     <PRDataTable.THeadCell
                       key={i}
-                      className="text-left py-2.5 px-3.5 bg-surface-50 dark:bg-gray-900/50 text-[11px] font-semibold uppercase tracking-wide text-surface-500 dark:text-gray-400 border-b border-surface-200 dark:border-gray-700 whitespace-nowrap"
+                      className={cn(
+                        "text-left py-2.5 px-3.5 bg-surface-50 dark:bg-gray-900/50 text-[11px] font-semibold uppercase tracking-wide text-surface-500 dark:text-gray-400 border-b border-surface-200 dark:border-gray-700 whitespace-nowrap",
+                        col.className
+                      )}
                     >
                       {col.header}
                     </PRDataTable.THeadCell>
