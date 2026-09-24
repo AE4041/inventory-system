@@ -28,12 +28,14 @@ const STATUS_OPTIONS = [
   { label: "Refunded", value: "REFUNDED" },
 ];
 
-// Mirrors the backend's EDIT_REFUND_WINDOW_MS in sales.service.js — an old, already-settled
-// invoice shouldn't stay editable/refundable indefinitely. This is a UI-only convenience
-// (hides buttons that would otherwise 400); the server enforces the real cutoff.
+// Mirrors the backend's EDIT_REFUND_WINDOW_MS/CANCEL_WINDOW_MS in sales.service.js — an old,
+// already-settled invoice shouldn't stay editable/refundable/cancellable indefinitely. Both
+// only apply once a sale is PAID (a DRAFT has no paidAt and isn't windowed at all). This is a
+// UI-only convenience (hides buttons that would otherwise 400); the server enforces the cutoff.
 const EDIT_REFUND_WINDOW_MS = 6 * 60 * 60 * 1000;
-function withinEditRefundWindow(sale) {
-  return !!sale.paidAt && Date.now() - new Date(sale.paidAt).getTime() <= EDIT_REFUND_WINDOW_MS;
+const CANCEL_WINDOW_MS = 2 * 60 * 60 * 1000;
+function withinWindow(sale, windowMs) {
+  return !!sale.paidAt && Date.now() - new Date(sale.paidAt).getTime() <= windowMs;
 }
 
 const PAYMENT_OPTIONS = [
@@ -156,44 +158,42 @@ export default function SalesHistoryPage({ fixedStatus }) {
                 {canManage && s.status === "DRAFT" && (
                   <Button icon="pi pi-check" text rounded severity="success" tooltip="Mark as Paid" onClick={() => handleMarkPaid(s)} />
                 )}
-                {isAdmin && s.status === "PAID" && withinEditRefundWindow(s) && (
+                {isAdmin && (s.status === "DRAFT" || (s.status === "PAID" && withinWindow(s, EDIT_REFUND_WINDOW_MS))) && (
                   <Button icon="pi pi-pencil" text rounded tooltip="Edit items" onClick={() => setEditingSale(s)} />
                 )}
-                {canManage && (s.status === "PAID" || s.status === "DRAFT") && (
-                  <>
-                    {s.status === "PAID" && withinEditRefundWindow(s) && (
-                      <Button
-                        icon="pi pi-replay"
-                        text
-                        rounded
-                        severity="warning"
-                        tooltip="Refund"
-                        onClick={() =>
-                          confirmDialog({
-                            message: `Refund ${s.receiptNumber}? Stock will be restored.`,
-                            header: "Confirm Refund",
-                            icon: "pi pi-exclamation-triangle",
-                            accept: () => setActionDialog({ sale: s, type: "refund" }),
-                          })
-                        }
-                      />
-                    )}
-                    <Button
-                      icon="pi pi-times"
-                      text
-                      rounded
-                      severity="danger"
-                      tooltip="Cancel"
-                      onClick={() =>
-                        confirmDialog({
-                          message: `Cancel ${s.receiptNumber}? Stock will be restored.`,
-                          header: "Confirm Cancellation",
-                          icon: "pi pi-exclamation-triangle",
-                          accept: () => setActionDialog({ sale: s, type: "cancel" }),
-                        })
-                      }
-                    />
-                  </>
+                {canManage && s.status === "PAID" && withinWindow(s, EDIT_REFUND_WINDOW_MS) && (
+                  <Button
+                    icon="pi pi-replay"
+                    text
+                    rounded
+                    severity="warning"
+                    tooltip="Refund"
+                    onClick={() =>
+                      confirmDialog({
+                        message: `Refund ${s.receiptNumber}? Stock will be restored.`,
+                        header: "Confirm Refund",
+                        icon: "pi pi-exclamation-triangle",
+                        accept: () => setActionDialog({ sale: s, type: "refund" }),
+                      })
+                    }
+                  />
+                )}
+                {canManage && (s.status === "DRAFT" || (s.status === "PAID" && withinWindow(s, CANCEL_WINDOW_MS))) && (
+                  <Button
+                    icon="pi pi-times"
+                    text
+                    rounded
+                    severity="danger"
+                    tooltip="Cancel"
+                    onClick={() =>
+                      confirmDialog({
+                        message: `Cancel ${s.receiptNumber}? Stock will be restored.`,
+                        header: "Confirm Cancellation",
+                        icon: "pi pi-exclamation-triangle",
+                        accept: () => setActionDialog({ sale: s, type: "cancel" }),
+                      })
+                    }
+                  />
                 )}
               </div>
             )}

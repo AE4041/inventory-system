@@ -7,16 +7,21 @@ import { effectivePrice } from "../utils/pricing.js";
 const SALE_INCLUDE = { items: { include: { product: true } }, payments: true, customer: true, store: true, cashier: { select: { id: true, name: true } } };
 
 // Refund and item-edit are only allowed within this window after a sale is marked paid —
-// old, already-settled invoices shouldn't stay mutable indefinitely.
+// old, already-settled invoices shouldn't stay mutable indefinitely. Cancelling (fully
+// voiding the sale) gets its own, tighter window since it's the more destructive action.
+// Both only apply once a sale is PAID — a DRAFT has no paidAt yet and isn't windowed at
+// all, since nothing about it is finalized.
 const EDIT_REFUND_WINDOW_MS = 6 * 60 * 60 * 1000;
+const CANCEL_WINDOW_MS = 2 * 60 * 60 * 1000;
 
 function round2(n) {
   return Math.round(n * 100) / 100;
 }
 
-function assertWithinEditRefundWindow(sale) {
-  if (!sale.paidAt || Date.now() - sale.paidAt.getTime() > EDIT_REFUND_WINDOW_MS) {
-    throw ApiError.badRequest("This invoice was marked paid more than 6 hours ago and can no longer be edited or refunded");
+function assertWithinWindow(sale, windowMs, actionLabel) {
+  if (!sale.paidAt || Date.now() - sale.paidAt.getTime() > windowMs) {
+    const hours = windowMs / (60 * 60 * 1000);
+    throw ApiError.badRequest(`This invoice was marked paid more than ${hours} hours ago and can no longer be ${actionLabel}`);
   }
 }
 
@@ -128,7 +133,7 @@ export async function refundSale({ organizationId, saleId, userId, reason }) {
   });
   if (!sale) throw ApiError.notFound("Sale not found");
   if (sale.status !== "PAID") throw ApiError.badRequest("Only paid sales can be refunded");
-  assertWithinEditRefundWindow(sale);
+  assertWithinWindow(sale, EDIT_REFUND_WINDOW_MS, "refunded");
 
   return prisma.$transaction(async (tx) => {
     for (const item of sale.items) {
@@ -153,7 +158,9 @@ export async function refundSale({ organizationId, saleId, userId, reason }) {
 
 // Also allowed on a DRAFT sale (not just PAID) — stock is already deducted the instant a
 // sale/redemption is created regardless of status, so a mis-rung draft needs a way to
-// release that stock without going through a full refund workflow.
+// release that stock without going through a full refund workflow. A DRAFT can be
+// cancelled any time (nothing about it is finalized yet); a PAID sale only within
+// CANCEL_WINDOW_MS of being marked paid.
 export async function cancelSale({ organizationId, saleId, userId, reason }) {
   const sale = await prisma.sale.findFirst({
     where: { id: saleId, store: { organizationId } },
@@ -161,6 +168,7 @@ export async function cancelSale({ organizationId, saleId, userId, reason }) {
   });
   if (!sale) throw ApiError.notFound("Sale not found");
   if (sale.status !== "PAID" && sale.status !== "DRAFT") throw ApiError.badRequest("Only paid or draft sales can be cancelled");
+  if (sale.status === "PAID") assertWithinWindow(sale, CANCEL_WINDOW_MS, "cancelled");
 
   return prisma.$transaction(async (tx) => {
     for (const item of sale.items) {
@@ -194,18 +202,20 @@ export async function markSalePaid({ organizationId, saleId }) {
   return prisma.sale.update({ where: { id: sale.id }, data: { status: "PAID", paidAt: new Date() }, include: SALE_INCLUDE });
 }
 
-// Admin correction on an already-paid invoice: `items` is the full desired line list
+// Admin correction on a draft or paid invoice: `items` is the full desired line list
 // ({productId, quantity}), diffed against what's currently on the sale. Quantity
 // increases/new products deduct stock, decreases/removals refund it — same
 // applyInventoryChange primitive every other stock-affecting action in this app uses.
+// A DRAFT can be edited any time; a PAID invoice only within EDIT_REFUND_WINDOW_MS of
+// being marked paid.
 export async function updateSaleItems({ organizationId, saleId, userId, items }) {
   const sale = await prisma.sale.findFirst({
     where: { id: saleId, store: { organizationId } },
     include: { items: true, store: true },
   });
   if (!sale) throw ApiError.notFound("Sale not found");
-  if (sale.status !== "PAID") throw ApiError.badRequest("Only paid invoices can be edited");
-  assertWithinEditRefundWindow(sale);
+  if (sale.status !== "PAID" && sale.status !== "DRAFT") throw ApiError.badRequest("Only paid or draft invoices can be edited");
+  if (sale.status === "PAID") assertWithinWindow(sale, EDIT_REFUND_WINDOW_MS, "edited");
 
   const productIds = items.map((i) => i.productId);
   const [products, organization, storeProducts] = await Promise.all([
