@@ -37,11 +37,8 @@ export default function LoginPage() {
       subtitle="Sign in to manage your stores"
       footer={
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card px-4 py-3 text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            New business? <Link to="/register" className="text-violet-600 font-medium">Create an account</Link>
-          </p>
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-            Demo: admin@demo.com &middot; manager@demo.com &middot; cashier@demo.com (password: password123)
+           Cant login? Contact the System Admin.
           </p>
         </div>
       }
