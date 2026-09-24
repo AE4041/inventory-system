@@ -126,7 +126,7 @@ export default function MikrotikVoucherCart({ storeId, currency }) {
               >
                 <Icon className={`${expanded ? "pi-chevron-down" : "pi-chevron-right"} text-xs text-gray-400 dark:text-gray-500`} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{item.productName}</p>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{item.productName}</p>
                   <p className="text-xs text-gray-400 dark:text-gray-500">{formatCurrency(item.unitPrice, currency)} each</p>
                 </div>
                 <span className="text-sm text-gray-500 dark:text-gray-400 w-14 text-right">x{item.quantity}</span>
