@@ -9,6 +9,35 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December",
 ];
 
+const MONTH_SHORT = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+// Fixed 7-day blocks from the 1st of the month (not real calendar weeks) — matches how
+// the store owner described grouping sales across all stores: 1-7, 8-14, 15-21, then
+// whatever's left (8-10 days depending on month length).
+const WEEK_START_DAYS = [1, 8, 15, 22];
+
+function weekBucket(day) {
+  if (day <= 7) return 1;
+  if (day <= 14) return 2;
+  if (day <= 21) return 3;
+  return 4;
+}
+
+function weekStartDate(year, month, weekNum) {
+  return new Date(year, month - 1, WEEK_START_DAYS[weekNum - 1]);
+}
+
+function weekRangeLabel(year, month, weekNum) {
+  const lastDayOfMonth = new Date(year, month, 0).getDate();
+  const startDay = WEEK_START_DAYS[weekNum - 1];
+  const endDay = weekNum < 4 ? WEEK_START_DAYS[weekNum] - 1 : lastDayOfMonth;
+  const mName = MONTH_SHORT[month - 1];
+  return `${ordinal(startDay)} ${mName} - ${ordinal(endDay)} ${mName}, ${year}`;
+}
+
 // Same TC codes as the manual paper sheet this replicates, with one addition (P — the
 // original repurposed the store owner sat down and picked "S/D/E/L" as its whole legend;
 // there was no code for "a sale was marked paid" because that concept doesn't exist in a
@@ -143,8 +172,193 @@ export async function getAccountsSheetData({ user, storeId, year, month }) {
   const primaryEnding = round2(primaryIn - primaryOut);
 
   return {
+    scope: "single",
     businessName: organization.name,
     storeName: store.name,
+    monthLabel: `${MONTH_NAMES[month - 1]} ${year}`,
+    currency: organization.currency,
+    year,
+    month,
+    rows,
+    summary: {
+      receiptsIn,
+      receiptsOut,
+      receiptsEnding,
+      primaryIn,
+      primaryOut,
+      primaryEnding,
+      totalFundsOnHand: primaryEnding,
+    },
+  };
+}
+
+// Same ledger format as getAccountsSheetData, but combining every store the user can
+// see into one sheet, grouped by fixed weekly blocks instead of by day. S/P rows are
+// aggregated per (store, week); E/L rows and manual entries stay one row per record
+// (matching "all expenses recorded on all stores must be shown present here too" —
+// each one visible, not folded into a weekly sum), each carrying its own store name.
+// Rows sort week-major: every store's rows for week 1, then week 2, and so on.
+export async function getAccountsSheetAllStoresData({ user, year, month }) {
+  const storeScope = resolveStoreScope(user); // no storeId -> org-wide (ADMIN) or the user's assigned stores
+  const stores = await prisma.store.findMany({ where: storeScope, orderBy: { name: "asc" } });
+  if (stores.length === 0) throw ApiError.badRequest("No accessible stores found");
+  const storeIds = stores.map((s) => s.id);
+  const storeNameById = new Map(stores.map((s) => [s.id, s.name]));
+
+  const organization = await prisma.organization.findUnique({ where: { id: user.organizationId } });
+
+  const start = new Date(year, month - 1, 1, 0, 0, 0, 0);
+  const end = new Date(year, month, 0, 23, 59, 59, 999);
+
+  const [sales, expenses, manualEntries] = await Promise.all([
+    prisma.sale.findMany({
+      where: {
+        storeId: { in: storeIds },
+        status: { not: "CANCELLED" },
+        OR: [
+          { createdAt: { gte: start, lte: end } },
+          { paidAt: { gte: start, lte: end } },
+          { status: "REFUNDED", refundedAt: { gte: start, lte: end } },
+        ],
+      },
+      select: { id: true, storeId: true, receiptNumber: true, total: true, createdAt: true, paidAt: true, status: true, refundedAt: true },
+    }),
+    prisma.expense.findMany({
+      where: { storeId: { in: storeIds }, date: { gte: start, lte: end } },
+      select: { id: true, storeId: true, description: true, amount: true, date: true },
+      orderBy: { date: "asc" },
+    }),
+    prisma.manualSaleEntry.findMany({
+      where: { storeId: { in: storeIds }, date: { gte: start, lte: end } },
+      select: { id: true, storeId: true, description: true, amount: true, date: true },
+      orderBy: { date: "asc" },
+    }),
+  ]);
+
+  const sByStoreWeek = new Map();
+  for (const s of sales) {
+    if (s.createdAt < start || s.createdAt > end) continue;
+    const weekNum = weekBucket(s.createdAt.getDate());
+    const key = `${s.storeId}|${weekNum}`;
+    const group = sByStoreWeek.get(key) ?? { storeId: s.storeId, weekNum, total: 0 };
+    group.total += Number(s.total);
+    sByStoreWeek.set(key, group);
+  }
+
+  const pByStoreWeek = new Map();
+  for (const s of sales) {
+    if (!s.paidAt || s.paidAt < start || s.paidAt > end) continue;
+    const weekNum = weekBucket(s.paidAt.getDate());
+    const key = `${s.storeId}|${weekNum}`;
+    const group = pByStoreWeek.get(key) ?? { storeId: s.storeId, weekNum, total: 0 };
+    group.total += Number(s.total);
+    pByStoreWeek.set(key, group);
+  }
+
+  const rows = [];
+  for (const { storeId, weekNum, total } of sByStoreWeek.values()) {
+    rows.push({
+      id: null,
+      source: "auto",
+      storeId,
+      storeName: storeNameById.get(storeId),
+      weekNum,
+      date: weekStartDate(year, month, weekNum),
+      description: weekRangeLabel(year, month, weekNum),
+      tc: "S",
+      receiptsIn: round2(total),
+      receiptsOut: 0,
+      primaryIn: 0,
+      primaryOut: 0,
+    });
+  }
+  for (const { storeId, weekNum, total } of pByStoreWeek.values()) {
+    rows.push({
+      id: null,
+      source: "auto",
+      storeId,
+      storeName: storeNameById.get(storeId),
+      weekNum,
+      date: weekStartDate(year, month, weekNum),
+      description: `${weekRangeLabel(year, month, weekNum)} (marked paid)`,
+      tc: "P",
+      receiptsIn: 0,
+      receiptsOut: round2(total),
+      primaryIn: round2(total),
+      primaryOut: 0,
+    });
+  }
+  for (const e of expenses) {
+    rows.push({
+      id: e.id,
+      source: "expense",
+      storeId: e.storeId,
+      storeName: storeNameById.get(e.storeId),
+      weekNum: weekBucket(e.date.getDate()),
+      date: e.date,
+      description: e.description,
+      tc: "E",
+      receiptsIn: 0,
+      receiptsOut: 0,
+      primaryIn: 0,
+      primaryOut: round2(Number(e.amount)),
+    });
+  }
+  for (const s of sales) {
+    if (s.status !== "REFUNDED" || !s.refundedAt || s.refundedAt < start || s.refundedAt > end) continue;
+    rows.push({
+      id: null,
+      source: "auto",
+      storeId: s.storeId,
+      storeName: storeNameById.get(s.storeId),
+      weekNum: weekBucket(s.refundedAt.getDate()),
+      date: s.refundedAt,
+      description: `Refund - ${s.receiptNumber}`,
+      tc: "L",
+      receiptsIn: 0,
+      receiptsOut: 0,
+      primaryIn: 0,
+      primaryOut: round2(Number(s.total)),
+    });
+  }
+  for (const m of manualEntries) {
+    const amount = round2(Number(m.amount));
+    rows.push({
+      id: m.id,
+      source: "manual-sale",
+      storeId: m.storeId,
+      storeName: storeNameById.get(m.storeId),
+      weekNum: weekBucket(m.date.getDate()),
+      date: m.date,
+      description: m.description,
+      tc: "S",
+      receiptsIn: 0,
+      receiptsOut: 0,
+      primaryIn: amount,
+      primaryOut: 0,
+    });
+  }
+
+  rows.sort((a, b) => {
+    if (a.weekNum !== b.weekNum) return a.weekNum - b.weekNum;
+    const storeCmp = a.storeName.localeCompare(b.storeName);
+    if (storeCmp !== 0) return storeCmp;
+    const tcCmp = TC_ORDER[a.tc] - TC_ORDER[b.tc];
+    if (tcCmp !== 0) return tcCmp;
+    return a.date - b.date;
+  });
+
+  const receiptsIn = round2(rows.reduce((sum, r) => sum + r.receiptsIn, 0));
+  const receiptsOut = round2(rows.reduce((sum, r) => sum + r.receiptsOut, 0));
+  const primaryIn = round2(rows.reduce((sum, r) => sum + r.primaryIn, 0));
+  const primaryOut = round2(rows.reduce((sum, r) => sum + r.primaryOut, 0));
+  const receiptsEnding = round2(receiptsIn - receiptsOut);
+  const primaryEnding = round2(primaryIn - primaryOut);
+
+  return {
+    scope: "all",
+    businessName: organization.name,
+    storeName: "All Stores",
     monthLabel: `${MONTH_NAMES[month - 1]} ${year}`,
     currency: organization.currency,
     year,
@@ -196,7 +410,7 @@ function formatAmount(n) {
   return n === 0 ? "" : Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-const COLS = [
+const COLS_SINGLE = [
   { key: "day", label: "Date", width: 32, align: "left" },
   { key: "description", label: "Transaction Description", width: 190, align: "left" },
   { key: "tc", label: "TC", width: 24, align: "center" },
@@ -204,6 +418,20 @@ const COLS = [
   { key: "receiptsOut", label: "Receipts Out", width: 70, align: "right" },
   { key: "primaryIn", label: "Primary In", width: 70, align: "right" },
   { key: "primaryOut", label: "Primary Out", width: 70, align: "right" },
+];
+
+// All-stores mode adds a Store column so a reader doesn't need the store name baked
+// into every description; there's plenty of spare landscape width (A4 landscape usable
+// width is ~770pt, these columns sum to well under that).
+const COLS_ALL = [
+  { key: "day", label: "Date", width: 32, align: "left" },
+  { key: "store", label: "Store", width: 80, align: "left" },
+  { key: "description", label: "Transaction Description", width: 160, align: "left" },
+  { key: "tc", label: "TC", width: 24, align: "center" },
+  { key: "receiptsIn", label: "Receipts In", width: 68, align: "right" },
+  { key: "receiptsOut", label: "Receipts Out", width: 68, align: "right" },
+  { key: "primaryIn", label: "Primary In", width: 68, align: "right" },
+  { key: "primaryOut", label: "Primary Out", width: 68, align: "right" },
 ];
 
 export function buildAccountsSheetPdf(data) {
@@ -214,6 +442,7 @@ export function buildAccountsSheetPdf(data) {
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
+    const COLS = data.scope === "all" ? COLS_ALL : COLS_SINGLE;
     const margin = 36;
     const tableWidth = COLS.reduce((s, c) => s + c.width, 0);
     const pageBottom = doc.page.height - margin;
@@ -281,7 +510,7 @@ export function buildAccountsSheetPdf(data) {
     drawTableHeader();
 
     for (const r of data.rows) {
-      drawRow({
+      const rowData = {
         day: String(r.date.getDate()).padStart(2, "0"),
         description: r.description,
         tc: r.tc,
@@ -289,12 +518,15 @@ export function buildAccountsSheetPdf(data) {
         receiptsOut: formatAmount(r.receiptsOut),
         primaryIn: formatAmount(r.primaryIn),
         primaryOut: formatAmount(r.primaryOut),
-      });
+      };
+      if (data.scope === "all") rowData.store = r.storeName;
+      drawRow(rowData);
     }
 
     drawRow(
       {
         day: "",
+        store: "",
         description: "TOTALS OF ALL COLUMNS",
         tc: "",
         receiptsIn: formatAmount(data.summary.receiptsIn),

@@ -3,6 +3,7 @@ import { ApiError } from "../utils/apiError.js";
 import { toCsv, sendCsv } from "../utils/csv.js";
 import {
   getAccountsSheetData,
+  getAccountsSheetAllStoresData,
   buildAccountsSheetPdf,
   createManualSaleEntry,
   deleteManualSaleEntry,
@@ -17,13 +18,20 @@ function parseYearMonth(req) {
   return { year, month };
 }
 
+function loadAccountsSheet(req, year, month) {
+  return req.query.storeId
+    ? getAccountsSheetData({ user: req.user, storeId: req.query.storeId, year, month })
+    : getAccountsSheetAllStoresData({ user: req.user, year, month });
+}
+
 export const getAccountsSheet = asyncHandler(async (req, res) => {
   const { year, month } = parseYearMonth(req);
-  const data = await getAccountsSheetData({ user: req.user, storeId: req.query.storeId, year, month });
+  const data = await loadAccountsSheet(req, year, month);
 
   if (req.query.export === "csv") {
     const csv = toCsv(data.rows, [
       { header: "Date", value: (r) => r.date.toISOString().slice(0, 10) },
+      ...(data.scope === "all" ? [{ header: "Store", value: (r) => r.storeName }] : []),
       { header: "Transaction Description", value: (r) => r.description },
       { header: "TC", value: (r) => r.tc },
       { header: "Receipts In", value: (r) => (r.receiptsIn ? r.receiptsIn.toFixed(2) : "") },
@@ -40,7 +48,7 @@ export const getAccountsSheet = asyncHandler(async (req, res) => {
 
 export const getAccountsSheetPdf = asyncHandler(async (req, res) => {
   const { year, month } = parseYearMonth(req);
-  const data = await getAccountsSheetData({ user: req.user, storeId: req.query.storeId, year, month });
+  const data = await loadAccountsSheet(req, year, month);
   const pdfBuffer = await buildAccountsSheetPdf(data);
   const filename = `${data.storeName.replace(/[^a-z0-9]+/gi, "-")}-${data.year}-${String(data.month).padStart(2, "0")}.pdf`;
   res.setHeader("Content-Type", "application/pdf");

@@ -47,15 +47,15 @@ const RECORD_TYPES = [
   { label: "Expense", value: "expense" },
 ];
 
-const EMPTY_SALE_FORM = { date: new Date(), description: "", amount: 0 };
-const EMPTY_EXPENSE_FORM = { date: new Date(), categoryId: null, description: "", amount: 0, paymentMethod: "CASH" };
+const EMPTY_SALE_FORM = { date: new Date(), description: "", amount: 0, storeId: null };
+const EMPTY_EXPENSE_FORM = { date: new Date(), categoryId: null, description: "", amount: 0, paymentMethod: "CASH", storeId: null };
 
 function dayOf(dateStr) {
   return String(new Date(dateStr).getDate()).padStart(2, "0");
 }
 
 export default function AccountsSheetPage() {
-  const { currentStoreId, isAllStores } = useStore();
+  const { currentStoreId, isAllStores, stores } = useStore();
   const toast = useToast();
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
@@ -70,17 +70,19 @@ export default function AccountsSheetPage() {
   const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
 
+  const queryParams = isAllStores ? { year, month } : { storeId: currentStoreId, year, month };
+
   function load() {
-    if (!currentStoreId) return;
+    if (!isAllStores && !currentStoreId) return;
     setLoading(true);
     reportsApi
-      .accountsSheet({ storeId: currentStoreId, year, month })
+      .accountsSheet(queryParams)
       .then(({ data }) => setResult(data.data))
       .catch((err) => toast.error(apiErrorMessage(err, "Could not load the accounts sheet")))
       .finally(() => setLoading(false));
   }
 
-  useEffect(load, [currentStoreId, year, month]);
+  useEffect(load, [currentStoreId, isAllStores, year, month]);
 
   useEffect(() => {
     expenseCategoriesApi.list().then(({ data }) => setCategories(data.data)).catch(() => {});
@@ -89,7 +91,7 @@ export default function AccountsSheetPage() {
   async function handleExportCsv() {
     setExporting(true);
     try {
-      await downloadCsv("/reports/accounts-sheet", { storeId: currentStoreId, year, month }, `${result?.storeName || "accounts-sheet"}-${year}-${String(month).padStart(2, "0")}.csv`);
+      await downloadCsv("/reports/accounts-sheet", queryParams, `${result?.storeName || "accounts-sheet"}-${year}-${String(month).padStart(2, "0")}.csv`);
     } catch (err) {
       toast.error(apiErrorMessage(err, "Could not export CSV"));
     } finally {
@@ -100,7 +102,7 @@ export default function AccountsSheetPage() {
   async function handleExportPdf() {
     setExporting(true);
     try {
-      await openPdfBlob("/reports/accounts-sheet/pdf", { storeId: currentStoreId, year, month });
+      await openPdfBlob("/reports/accounts-sheet/pdf", queryParams);
     } catch (err) {
       toast.error(apiErrorMessage(err, "Could not export PDF"));
     } finally {
@@ -110,8 +112,8 @@ export default function AccountsSheetPage() {
 
   function openAddDialog() {
     setRecordType("sale");
-    setSaleForm(EMPTY_SALE_FORM);
-    setExpenseForm(EMPTY_EXPENSE_FORM);
+    setSaleForm({ ...EMPTY_SALE_FORM, storeId: isAllStores ? null : currentStoreId });
+    setExpenseForm({ ...EMPTY_EXPENSE_FORM, storeId: isAllStores ? null : currentStoreId });
     setDialogOpen(true);
   }
 
@@ -119,10 +121,11 @@ export default function AccountsSheetPage() {
     setSaving(true);
     try {
       if (recordType === "sale") {
-        await reportsApi.addManualSaleEntry({ storeId: currentStoreId, date: saleForm.date, description: saleForm.description, amount: saleForm.amount });
+        await reportsApi.addManualSaleEntry({ storeId: saleForm.storeId, date: saleForm.date, description: saleForm.description, amount: saleForm.amount });
         toast.success("Manual sale recorded");
       } else {
-        await expensesApi.create({ storeId: currentStoreId, ...expenseForm });
+        const { storeId, date, categoryId, description, amount, paymentMethod } = expenseForm;
+        await expensesApi.create({ storeId, date, categoryId, description, amount, paymentMethod });
         toast.success("Expense recorded");
       }
       setDialogOpen(false);
@@ -151,20 +154,8 @@ export default function AccountsSheetPage() {
     });
   }
 
-  const canSaveSale = saleForm.description.trim() && saleForm.amount > 0;
-  const canSaveExpense = expenseForm.categoryId && expenseForm.description.trim() && expenseForm.amount > 0;
-
-  if (isAllStores) {
-    return (
-      <div className="mx-auto w-full">
-        <PageHeader title="Accounts Sheet" />
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-10 text-center text-gray-500 dark:text-gray-400">
-          <Icon className="pi-info-circle text-2xl mb-2 block" />
-          Select a specific store from the top bar to view its accounts sheet.
-        </div>
-      </div>
-    );
-  }
+  const canSaveSale = saleForm.description.trim() && saleForm.amount > 0 && (!isAllStores || saleForm.storeId);
+  const canSaveExpense = expenseForm.categoryId && expenseForm.description.trim() && expenseForm.amount > 0 && (!isAllStores || expenseForm.storeId);
 
   const currency = result?.currency || "GHS";
   const summary = result?.summary;
@@ -174,7 +165,11 @@ export default function AccountsSheetPage() {
       <ConfirmDialog />
       <PageHeader
         title="Accounts Sheet"
-        subtitle="Monthly sales, confirmed payments, expenses and refunds — same format as your paper ledger."
+        subtitle={
+          isAllStores
+            ? "All stores combined, grouped weekly — sales, confirmed payments, expenses and refunds in one place."
+            : "Monthly sales, confirmed payments, expenses and refunds — same format as your paper ledger."
+        }
         actions={
           <div className="flex flex-wrap gap-2">
             <Dropdown optionValue="value" value={month} options={MONTHS} onChange={(e) => setMonth(e.value)} className="w-36" />
@@ -205,10 +200,14 @@ export default function AccountsSheetPage() {
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card overflow-x-auto mb-4">
         <DataTable
           value={result?.rows || []}
+          rows={result?.rows?.length || 10}
           loading={loading}
           emptyMessage={<EmptyState icon="pi-calculator" title="No activity this month" subtitle="Sales, payments, expenses and refunds for this store will show up here." />}
         >
           <Column header="Date" body={(r) => dayOf(r.date)} className="border-r border-gray-200 dark:border-gray-700" />
+          {result?.scope === "all" && (
+            <Column header="Store" field="storeName" className="border-r border-gray-200 dark:border-gray-700" />
+          )}
           <Column header="Transaction Description" field="description" className="border-r border-gray-200 dark:border-gray-700" />
           <Column header="TC" body={(r) => <span className="font-mono font-semibold">{r.tc}</span>} className="border-r border-gray-200 dark:border-gray-700" />
           <Column header="Receipts In" body={(r) => (r.receiptsIn ? formatCurrency(r.receiptsIn, currency) : "")} className="border-r border-gray-200 dark:border-gray-700" />
@@ -270,6 +269,19 @@ export default function AccountsSheetPage() {
 
         {recordType === "sale" ? (
           <div className="space-y-3">
+            {isAllStores && (
+              <div>
+                <label className="text-xs font-medium text-gray-600 dark:text-gray-300 block mb-1">Store</label>
+                <Dropdown
+                  optionValue="value"
+                  value={saleForm.storeId}
+                  options={stores.map((s) => ({ label: s.name, value: s.id }))}
+                  onChange={(e) => setSaleForm((f) => ({ ...f, storeId: e.value }))}
+                  placeholder="Select a store"
+                  className="w-full"
+                />
+              </div>
+            )}
             <div>
               <label className="text-xs font-medium text-gray-600 dark:text-gray-300 block mb-1">Date</label>
               <Calendar value={saleForm.date} onChange={(e) => setSaleForm((f) => ({ ...f, date: e.value }))} dateFormat="M d, yy" className="w-full" />
@@ -284,6 +296,19 @@ export default function AccountsSheetPage() {
           </div>
         ) : (
           <div className="space-y-3">
+            {isAllStores && (
+              <div>
+                <label className="text-xs font-medium text-gray-600 dark:text-gray-300 block mb-1">Store</label>
+                <Dropdown
+                  optionValue="value"
+                  value={expenseForm.storeId}
+                  options={stores.map((s) => ({ label: s.name, value: s.id }))}
+                  onChange={(e) => setExpenseForm((f) => ({ ...f, storeId: e.value }))}
+                  placeholder="Select a store"
+                  className="w-full"
+                />
+              </div>
+            )}
             <div>
               <label className="text-xs font-medium text-gray-600 dark:text-gray-300 block mb-1">Date</label>
               <Calendar value={expenseForm.date} onChange={(e) => setExpenseForm((f) => ({ ...f, date: e.value }))} dateFormat="M d, yy" className="w-full" />
