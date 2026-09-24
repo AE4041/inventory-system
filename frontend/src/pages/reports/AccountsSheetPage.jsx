@@ -275,9 +275,9 @@ export default function AccountsSheetPage() {
               <Calendar value={saleForm.date} onChange={(e) => setSaleForm((f) => ({ ...f, date: e.value }))} dateFormat="M d, yy" className="w-full" />
             </div>
             <InputText placeholder="Description (e.g. Off-books cash sale)" value={saleForm.description} onChange={(e) => setSaleForm((f) => ({ ...f, description: e.target.value }))} className="w-full" />
-            <div className="flex items-center justify-between">
+            <div className="flex items-center w-full gap-x-0.5">
               <span className="text-sm text-gray-500 dark:text-gray-400">Amount</span>
-              <InputNumber value={saleForm.amount} onValueChange={(e) => setSaleForm((f) => ({ ...f, amount: e.value || 0 }))} mode="decimal" minFractionDigits={2} min={0} className="w-40" inputClassName="text-right" />
+              <InputNumber value={saleForm.amount} onValueChange={(e) => setSaleForm((f) => ({ ...f, amount: e.value || 0 }))} mode="decimal" minFractionDigits={2} min={0} className="w-full" inputClassName="text-right" />
             </div>
             <p className="text-xs text-gray-400 dark:text-gray-500">Counts immediately as confirmed revenue — no separate "mark as paid" step, since you're confirming it by entering it.</p>
             <Button label="Save Sale" className="w-full" loading={saving} disabled={!canSaveSale} onClick={handleSaveRecord} />
