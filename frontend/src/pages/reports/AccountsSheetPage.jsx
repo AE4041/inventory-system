@@ -156,7 +156,7 @@ export default function AccountsSheetPage() {
 
   if (isAllStores) {
     return (
-      <div className="mx-auto w-full max-w-7xl px-5">
+      <div className="mx-auto w-full">
         <PageHeader title="Accounts Sheet" />
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-10 text-center text-gray-500 dark:text-gray-400">
           <Icon className="pi-info-circle text-2xl mb-2 block" />
@@ -170,7 +170,7 @@ export default function AccountsSheetPage() {
   const summary = result?.summary;
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-5">
+    <div className="mx-auto w-full">
       <ConfirmDialog />
       <PageHeader
         title="Accounts Sheet"
