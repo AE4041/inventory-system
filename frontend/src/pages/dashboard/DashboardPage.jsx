@@ -98,7 +98,7 @@ export default function DashboardPage() {
                   <ChartLine className="size-4" />
                 </div>
               </div>
-              <p className="text-xl font-bold text-gray-900 dark:text-white mt-3">{formatCurrency(data.sales.totalSales, currency)}</p>
+              <p className="text-xl font-bold text-rose-700 mt-3">{formatCurrency(data.sales.totalSales, currency)}</p>
               {data.salesOverTime?.length > 1 && (
                 <div className="h-10 -mx-2 -mb-1 mt-1">
                   <ResponsiveContainer width="100%" height="100%">
@@ -117,7 +117,7 @@ export default function DashboardPage() {
                   <Wallet className="size-4" />
                 </div>
               </div>
-              <p className="text-xl font-bold text-gray-900 dark:text-white mt-3">{formatCurrency(data.netRevenue, currency)}</p>
+              <p className="text-xl font-bold text-teal-700 mt-3">{formatCurrency(data.netRevenue, currency)}</p>
               <p className="text-xs text-teal-700/70 mt-1">{data.sales.transactions} transaction{data.sales.transactions === 1 ? "" : "s"}</p>
             </div>
           </div>
