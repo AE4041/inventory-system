@@ -8,30 +8,30 @@ export const listStores = asyncHandler(async (req, res) => {
   if (req.user.role !== "ADMIN") {
     where.id = { in: req.user.storeIds };
   }
-  // mikrotikToken is a credential, not a display field — never return it from a listing
-  // any authenticated user (cashiers included) can call.
-  const stores = await prisma.store.findMany({ where, orderBy: { name: "asc" }, omit: { mikrotikToken: true } });
+  // mikrotikToken/telegramBotToken are credentials, not display fields — never return them
+  // from a listing any authenticated user (cashiers included) can call.
+  const stores = await prisma.store.findMany({ where, orderBy: { name: "asc" }, omit: { mikrotikToken: true, telegramBotToken: true } });
   res.json({ success: true, data: stores });
 });
 
 export const getStore = asyncHandler(async (req, res) => {
   const store = await prisma.store.findFirst({
     where: { id: req.params.id, organizationId: req.user.organizationId },
-    omit: { mikrotikToken: true },
+    omit: { mikrotikToken: true, telegramBotToken: true },
   });
   if (!store) throw ApiError.notFound("Store not found");
   res.json({ success: true, data: store });
 });
 
-// Admin-only: whether an integration token has been generated for this store yet, without
-// ever returning the token value itself once it's been shown at generation time.
+// Admin-only: whether an integration token/telegram bot has been configured for this store,
+// without ever returning the credential values themselves.
 export const getMikrotikStatus = asyncHandler(async (req, res) => {
   const store = await prisma.store.findFirst({
     where: { id: req.params.id, organizationId: req.user.organizationId },
-    select: { id: true, mikrotikToken: true },
+    select: { id: true, mikrotikToken: true, telegramBotToken: true },
   });
   if (!store) throw ApiError.notFound("Store not found");
-  res.json({ success: true, data: { hasToken: !!store.mikrotikToken } });
+  res.json({ success: true, data: { hasToken: !!store.mikrotikToken, hasTelegramBot: !!store.telegramBotToken } });
 });
 
 export const createStore = asyncHandler(async (req, res) => {

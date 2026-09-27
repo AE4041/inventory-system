@@ -37,6 +37,8 @@ export const storeSchema = z.object({
   phone: z.string().optional().nullable(),
   email: z.string().email().optional().nullable().or(z.literal("")),
   active: z.boolean().optional(),
+  telegramBotToken: z.string().optional().nullable(),
+  telegramChatId: z.string().optional().nullable(),
 });
 
 export const categorySchema = z.object({

@@ -3,6 +3,8 @@ import { ApiError } from "../utils/apiError.js";
 const DECREASING_TYPES = new Set(["DEDUCTION", "SALE", "TRANSFER_OUT"]);
 const INCREASING_TYPES = new Set(["ADDITION", "REFUND", "TRANSFER_IN"]);
 
+export const INSUFFICIENT_STOCK_MESSAGE = "This action would make stock negative. Not enough stock available.";
+
 /**
  * Applies a stock change for one product at one store and writes the audit trail row.
  * Must be called with a Prisma transaction client (`tx`) so it stays atomic with
@@ -28,7 +30,7 @@ export async function applyInventoryChange(tx, { storeId, productId, userId, typ
     loggedQuantity = newQuantity - previousQuantity;
 
     if (newQuantity < 0 && !allowNegative) {
-      throw ApiError.badRequest("This action would make stock negative. Not enough stock available.");
+      throw ApiError.badRequest(INSUFFICIENT_STOCK_MESSAGE);
     }
     await tx.storeProduct.update({ where: { id: storeProduct.id }, data: { quantity: newQuantity } });
   } else if (INCREASING_TYPES.has(type) || DECREASING_TYPES.has(type)) {
@@ -50,7 +52,7 @@ export async function applyInventoryChange(tx, { storeId, productId, userId, typ
     if (newQuantity < 0 && !allowNegative) {
       // Throwing here rolls back the whole enclosing transaction, so the negative
       // value written just above never actually persists.
-      throw ApiError.badRequest("This action would make stock negative. Not enough stock available.");
+      throw ApiError.badRequest(INSUFFICIENT_STOCK_MESSAGE);
     }
   } else {
     throw ApiError.badRequest(`Unknown inventory transaction type: ${type}`);

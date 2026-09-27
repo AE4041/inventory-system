@@ -128,6 +128,12 @@ model Store {
   // webhook calls with this instead of a user login). Null until an admin generates one.
   mikrotikToken String? @unique
 
+  // Backend-sent Telegram alerts (low stock / out-of-stock on MikroTik-mapped products) —
+  // separate from the router's own hardcoded sale alerts, since only the backend can see
+  // stock levels. Null until an admin configures a bot for this store.
+  telegramBotToken String?
+  telegramChatId   String?
+
   userAccess            UserStore[]
   storeProducts         StoreProduct[]
   inventoryTransactions InventoryTransaction[]

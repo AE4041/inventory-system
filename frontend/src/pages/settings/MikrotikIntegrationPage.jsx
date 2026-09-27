@@ -30,6 +30,11 @@ export default function MikrotikIntegrationPage() {
   const [savingMapping, setSavingMapping] = useState(false);
   const [closingDay, setClosingDay] = useState(false);
 
+  const [hasTelegramBot, setHasTelegramBot] = useState(false);
+  const [telegramBotToken, setTelegramBotToken] = useState("");
+  const [telegramChatId, setTelegramChatId] = useState("");
+  const [savingTelegram, setSavingTelegram] = useState(false);
+
   useEffect(() => {
     productsApi.list({ active: true, pageSize: 200 }).then(({ data }) => setProducts(data.data));
     loadMappings();
@@ -39,11 +44,34 @@ export default function MikrotikIntegrationPage() {
     if (!selectedStoreId) return;
     setNewToken(null);
     setCheckingToken(true);
+    setTelegramBotToken("");
     storesApi
       .getMikrotikStatus(selectedStoreId)
-      .then(({ data }) => setHasToken(data.data.hasToken))
+      .then(({ data }) => {
+        setHasToken(data.data.hasToken);
+        setHasTelegramBot(data.data.hasTelegramBot);
+      })
       .finally(() => setCheckingToken(false));
+    storesApi.get(selectedStoreId).then(({ data }) => setTelegramChatId(data.data.telegramChatId || ""));
   }, [selectedStoreId]);
+
+  async function handleSaveTelegram() {
+    setSavingTelegram(true);
+    try {
+      const payload = { telegramChatId: telegramChatId.trim() || null };
+      if (telegramBotToken.trim()) payload.telegramBotToken = telegramBotToken.trim();
+      await storesApi.update(selectedStoreId, payload);
+      if (telegramBotToken.trim()) {
+        setHasTelegramBot(true);
+        setTelegramBotToken("");
+      }
+      toast.success("Telegram alert settings saved");
+    } catch (err) {
+      toast.error(apiErrorMessage(err, "Could not save Telegram settings"));
+    } finally {
+      setSavingTelegram(false);
+    }
+  }
 
   function loadMappings() {
     mikrotikApi.listMappings().then(({ data }) => setMappings(data.data));
@@ -177,6 +205,32 @@ export default function MikrotikIntegrationPage() {
           <Column header="Product" body={(m) => m.product.name} />
           <Column header="" body={(m) => <Button icon="pi pi-trash" text rounded severity="danger" onClick={() => handleDeleteMapping(m)} />} />
         </DataTable>
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-card p-4">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">4. Telegram Alerts</h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+          Separate from the router's own sale alerts — this is sent by the inventory system itself when a MikroTik-mapped product
+          runs low or a redemption gets rejected for having no stock left, so a gap like that never goes unnoticed again.
+        </p>
+
+        <div className="flex flex-wrap items-end gap-2">
+          <div>
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-300 block mb-1">Bot Token</label>
+            <InputText
+              value={telegramBotToken}
+              onChange={(e) => setTelegramBotToken(e.target.value)}
+              placeholder={hasTelegramBot ? "Already set — leave blank to keep" : "e.g. 8012711440:AAH..."}
+              className="w-64 font-mono text-xs"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-300 block mb-1">Chat ID</label>
+            <InputText value={telegramChatId} onChange={(e) => setTelegramChatId(e.target.value)} placeholder="e.g. -1003721009474" className="w-48 font-mono text-xs" />
+          </div>
+          <Button label="Save" loading={savingTelegram} onClick={handleSaveTelegram} disabled={!selectedStoreId} />
+        </div>
+        {!checkingToken && hasTelegramBot && <p className="text-xs text-emerald-600 font-medium mt-2">A bot token is already configured for this store</p>}
       </div>
     </div>
   );

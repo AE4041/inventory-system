@@ -1,8 +1,9 @@
 import { prisma } from "../lib/prisma.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
-import { applyInventoryChange } from "../services/inventory.service.js";
+import { applyInventoryChange, INSUFFICIENT_STOCK_MESSAGE } from "../services/inventory.service.js";
 import { getOrCreateSystemUser } from "../services/systemUser.service.js";
+import { sendTelegramAlert } from "../services/telegram.service.js";
 import {
   closeOutStore,
   closeOutAllStores,
@@ -70,8 +71,8 @@ export const voucherRedeemed = asyncHandler(async (req, res) => {
   }
 
   try {
-    const redemption = await prisma.$transaction(async (tx) => {
-      await applyInventoryChange(tx, {
+    const { redemption, newQuantity } = await prisma.$transaction(async (tx) => {
+      const inventoryTransaction = await applyInventoryChange(tx, {
         storeId: store.id,
         productId,
         userId: systemUser.id,
@@ -80,12 +81,28 @@ export const voucherRedeemed = asyncHandler(async (req, res) => {
         reason: `Voucher redeemed (${profile})${voucherCode ? ` - ${voucherCode}` : ""}`,
       });
 
-      return tx.voucherRedemption.create({
+      const redemption = await tx.voucherRedemption.create({
         data: { storeId: store.id, productId, profile, voucherCode: voucherCode || null },
       });
+
+      return { redemption, newQuantity: inventoryTransaction.newQuantity };
     });
 
     res.status(201).json({ success: true, data: redemption });
+
+    // Fire-and-forget: a Telegram/DB hiccup here must never surface as a request error,
+    // since the response has already been sent.
+    prisma.product
+      .findUnique({ where: { id: productId }, select: { name: true, minStockLevel: true } })
+      .then((product) => {
+        if (product && newQuantity <= product.minStockLevel) {
+          return sendTelegramAlert(
+            store,
+            `⚠️ LOW STOCK — ${store.name}\nProduct: ${product.name}\nRemaining: ${newQuantity}\nTop up soon to avoid rejected sales.`
+          );
+        }
+      })
+      .catch((err) => console.error("[telegram] low-stock check failed:", err.message));
   } catch (err) {
     if (err.code === "P2002" && voucherCode) {
       const existing = await prisma.voucherRedemption.findUnique({
@@ -93,6 +110,19 @@ export const voucherRedeemed = asyncHandler(async (req, res) => {
       });
       if (existing) return res.status(200).json({ success: true, data: existing, duplicate: true });
     }
+
+    if (err instanceof ApiError && err.message === INSUFFICIENT_STOCK_MESSAGE) {
+      prisma.product
+        .findUnique({ where: { id: productId }, select: { name: true } })
+        .then((product) =>
+          sendTelegramAlert(
+            store,
+            `🚫 OUT OF STOCK — ${store.name}\nProduct: ${product?.name || profile}\nVoucher ${voucherCode || "(no code)"} was sold but REJECTED — no stock left.\nTop up stock now, then manually recover this sale.`
+          )
+        )
+        .catch((e) => console.error("[telegram] out-of-stock alert failed:", e.message));
+    }
+
     throw err;
   }
 });
