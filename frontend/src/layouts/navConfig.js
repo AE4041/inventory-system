@@ -43,6 +43,7 @@ export const NAV_SECTIONS = [
       { label: "Products", to: "/reports/products", icon: "pi-star" },
       { label: "Store Performance", to: "/reports/stores", icon: "pi-building" },
       { label: "Accounts Sheet", to: "/reports/accounts-sheet", icon: "pi-calculator" },
+      { label: "Bank Accounts", to: "/settings/bank-accounts", icon: "pi-wallet", roles: ["ADMIN"] },
     ],
   },
   {
@@ -61,7 +62,6 @@ export const NAV_SECTIONS = [
     items: [
       { label: "Business Settings", to: "/settings", icon: "pi-cog" },
       { label: "MikroTik Integration", to: "/settings/mikrotik", icon: "pi-wifi" },
-      { label: "Bank Accounts", to: "/settings/bank-accounts", icon: "pi-wallet" },
     ],
   },
 ];
