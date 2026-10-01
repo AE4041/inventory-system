@@ -4,9 +4,10 @@ import { ApiError } from "../utils/apiError.js";
 import { assertStoreAccess } from "../middleware/auth.js";
 import { createSale, refundSale, cancelSale, markSalePaid, updateSaleItems } from "../services/sales.service.js";
 import { parsePagination, paginatedResponse } from "../utils/pagination.js";
+import { resolveDateRange } from "../utils/dateRange.js";
 
 function buildSalesWhere(req) {
-  const { storeId, customerId, userId, productId, paymentMethod, status, from, to } = req.query;
+  const { storeId, customerId, userId, productId, paymentMethod, status, preset, from, to } = req.query;
 
   const where = { store: { organizationId: req.user.organizationId } };
   if (storeId) {
@@ -20,10 +21,9 @@ function buildSalesWhere(req) {
   if (paymentMethod) where.paymentMethod = paymentMethod;
   if (status) where.status = status;
   if (productId) where.items = { some: { productId } };
-  if (from || to) {
-    where.createdAt = {};
-    if (from) where.createdAt.gte = new Date(from);
-    if (to) where.createdAt.lte = new Date(to);
+  if (preset || from || to) {
+    const range = resolveDateRange(preset, from, to);
+    where.createdAt = { gte: range.from, lte: range.to };
   }
   return where;
 }
