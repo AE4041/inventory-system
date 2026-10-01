@@ -154,3 +154,7 @@ export const bankTransactionSchema = z.object({
   date: z.coerce.date(),
   description: z.string().optional().nullable(),
 });
+
+export const editBankTransactionSchema = bankTransactionSchema.extend({
+  reason: z.string().min(1, "A reason for the edit is required"),
+});

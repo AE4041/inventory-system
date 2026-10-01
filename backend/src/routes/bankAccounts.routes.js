@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authenticate, authorize } from "../middleware/auth.js";
 import { validateBody } from "../middleware/validate.js";
-import { bankAccountSchema, bankTransactionSchema } from "../utils/schemas.js";
+import { bankAccountSchema, bankTransactionSchema, editBankTransactionSchema } from "../utils/schemas.js";
 import {
   getBankAccounts,
   addBankAccount,
@@ -9,6 +9,7 @@ import {
   removeBankAccount,
   getBankTransactions,
   addBankTransaction,
+  updateBankTransaction,
   removeBankTransaction,
 } from "../controllers/bankAccount.controller.js";
 
@@ -23,6 +24,7 @@ router.patch("/:id", validateBody(bankAccountSchema.partial()), editBankAccount)
 router.delete("/:id", removeBankAccount);
 router.get("/:id/transactions", getBankTransactions);
 router.post("/:id/transactions", validateBody(bankTransactionSchema), addBankTransaction);
+router.patch("/transactions/:transactionId", validateBody(editBankTransactionSchema), updateBankTransaction);
 router.delete("/transactions/:transactionId", removeBankTransaction);
 
 export default router;

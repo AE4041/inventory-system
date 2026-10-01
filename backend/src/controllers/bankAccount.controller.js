@@ -7,6 +7,7 @@ import {
   deleteBankAccount,
   listBankTransactions,
   recordBankTransaction,
+  editBankTransaction,
   deleteBankTransaction,
 } from "../services/bankAccount.service.js";
 
@@ -44,6 +45,16 @@ export const addBankTransaction = asyncHandler(async (req, res) => {
     ...req.body,
   });
   res.status(201).json({ success: true, data: transaction });
+});
+
+export const updateBankTransaction = asyncHandler(async (req, res) => {
+  const transaction = await editBankTransaction({
+    organizationId: req.user.organizationId,
+    transactionId: req.params.transactionId,
+    userId: req.user.id,
+    ...req.body,
+  });
+  res.json({ success: true, data: transaction });
 });
 
 export const removeBankTransaction = asyncHandler(async (req, res) => {

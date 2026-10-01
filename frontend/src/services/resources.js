@@ -113,6 +113,7 @@ export const bankAccountsApi = {
   remove: (id) => api.delete(`/bank-accounts/${id}`),
   listTransactions: (id, params) => api.get(`/bank-accounts/${id}/transactions`, { params }),
   addTransaction: (id, data) => api.post(`/bank-accounts/${id}/transactions`, data),
+  editTransaction: (transactionId, data) => api.patch(`/bank-accounts/transactions/${transactionId}`, data),
   removeTransaction: (transactionId) => api.delete(`/bank-accounts/transactions/${transactionId}`),
 };
 

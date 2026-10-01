@@ -6,6 +6,12 @@ const DECREASING_TYPES = new Set(["WITHDRAWAL", "SERVICE_CHARGE"]);
 
 export const INSUFFICIENT_BALANCE_MESSAGE = "This would make the account balance negative. Not enough funds available.";
 
+// A transaction can only be corrected within this long of being recorded — mirrors
+// EDIT_REFUND_WINDOW_MS in sales.service.js, measured from createdAt (when it was actually
+// entered) rather than its own `date` field (which the user can backdate), since the point
+// is "how long do you have to fix a mistake you just made."
+const EDIT_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 const ACCOUNT_SELECT = { id: true, name: true, bankName: true, accountNumber: true, balance: true, active: true, createdAt: true };
 
 export async function listBankAccounts(organizationId) {
@@ -99,6 +105,54 @@ export async function recordBankTransaction({ organizationId, accountId, userId,
 
     return tx.bankTransaction.create({
       data: { bankAccountId: accountId, userId, type, amount, previousBalance, newBalance, date, description: description || null },
+      include: { user: { select: { id: true, name: true } } },
+    });
+  });
+}
+
+// Corrects an existing transaction's type/amount/date/description within EDIT_WINDOW_MS of
+// it being recorded, with a mandatory reason. The account balance is adjusted by the NET
+// difference between the old and new effect in one atomic step (equivalent to reversing the
+// old transaction and applying the new one, but keeping the same row/id and its real
+// createdAt), still guarded against going negative.
+export async function editBankTransaction({ organizationId, transactionId, userId, type, amount, date, description, reason }) {
+  const existing = await prisma.bankTransaction.findFirst({
+    where: { id: transactionId, bankAccount: { organizationId } },
+  });
+  if (!existing) throw ApiError.notFound("Bank transaction not found");
+  if (!INCREASING_TYPES.has(type) && !DECREASING_TYPES.has(type)) throw ApiError.badRequest(`Unknown bank transaction type: ${type}`);
+
+  if (Date.now() - existing.createdAt.getTime() > EDIT_WINDOW_MS) {
+    throw ApiError.badRequest("This transaction was recorded more than 24 hours ago and can no longer be edited");
+  }
+
+  const oldDelta = INCREASING_TYPES.has(existing.type) ? Number(existing.amount) : -Number(existing.amount);
+  const newDelta = INCREASING_TYPES.has(type) ? amount : -amount;
+  const netDelta = newDelta - oldDelta;
+
+  return prisma.$transaction(async (tx) => {
+    const account = await tx.bankAccount.update({
+      where: { id: existing.bankAccountId },
+      data: { balance: { increment: netDelta } },
+    });
+
+    const newAccountBalance = Number(account.balance);
+    if (newAccountBalance < 0) throw ApiError.badRequest(INSUFFICIENT_BALANCE_MESSAGE);
+    const previousBalance = newAccountBalance - netDelta;
+
+    return tx.bankTransaction.update({
+      where: { id: transactionId },
+      data: {
+        type,
+        amount,
+        date,
+        description: description || null,
+        previousBalance,
+        newBalance: newAccountBalance,
+        editedAt: new Date(),
+        editedById: userId,
+        editReason: reason,
+      },
       include: { user: { select: { id: true, name: true } } },
     });
   });

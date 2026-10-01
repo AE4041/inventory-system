@@ -518,6 +518,13 @@ model BankTransaction {
   date            DateTime
   description     String?
 
+  // A transaction may be corrected within EDIT_WINDOW_MS of being recorded (see
+  // bankAccount.service.js) — editReason is required by the API whenever these are set,
+  // same bare-scalar audit pattern as Sale.editedAt/editedByUserId (no Prisma relation).
+  editedAt   DateTime?
+  editedById String?
+  editReason String?
+
   createdAt DateTime @default(now())
 
   @@index([bankAccountId])
