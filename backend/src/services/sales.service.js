@@ -18,6 +18,10 @@ function round2(n) {
   return Math.round(n * 100) / 100;
 }
 
+function dateOnly(d) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
 function assertWithinWindow(sale, windowMs, actionLabel) {
   if (!sale.paidAt || Date.now() - sale.paidAt.getTime() > windowMs) {
     const hours = windowMs / (60 * 60 * 1000);
@@ -201,8 +205,11 @@ export async function markSalePaid({ organizationId, saleId, paidAt }) {
 
   const resolvedPaidAt = paidAt ?? new Date();
   if (paidAt) {
-    if (paidAt.getTime() > Date.now()) throw ApiError.badRequest("Paid date cannot be in the future");
-    if (paidAt.getTime() < sale.createdAt.getTime()) throw ApiError.badRequest("Paid date cannot be before the sale was created");
+    // The date picker only lets you choose a calendar day, not a time of day — comparing
+    // exact timestamps would reject "the same day the sale was created" for any sale not
+    // created at exactly midnight (i.e. virtually all of them). Compare by calendar day.
+    if (dateOnly(paidAt).getTime() > dateOnly(new Date()).getTime()) throw ApiError.badRequest("Paid date cannot be in the future");
+    if (dateOnly(paidAt).getTime() < dateOnly(sale.createdAt).getTime()) throw ApiError.badRequest("Paid date cannot be before the sale was created");
   }
 
   return prisma.sale.update({ where: { id: sale.id }, data: { status: "PAID", paidAt: resolvedPaidAt }, include: SALE_INCLUDE });
