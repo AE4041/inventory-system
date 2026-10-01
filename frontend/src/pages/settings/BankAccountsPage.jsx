@@ -380,7 +380,7 @@ export default function BankAccountsPage() {
                 mode="decimal"
                 minFractionDigits={2}
                 min={0}
-                className="w-40"
+                className="w-full"
                 inputClassName="text-right"
               />
             </div>
@@ -404,7 +404,7 @@ export default function BankAccountsPage() {
               mode="decimal"
               minFractionDigits={2}
               min={0}
-              className="w-40"
+              className="w-full"
               inputClassName="text-right"
             />
           </div>
