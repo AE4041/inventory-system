@@ -23,10 +23,6 @@ export const NAV_SECTIONS = [
     ],
   },
   {
-    title: "Customers",
-    items: [{ label: "Customers", to: "/customers", icon: "pi-users" }],
-  },
-  {
     title: "Expenses",
     items: [
       { label: "Expenses", to: "/expenses", icon: "pi-money-bill" },
@@ -43,13 +39,15 @@ export const NAV_SECTIONS = [
       { label: "Products", to: "/reports/products", icon: "pi-star" },
       { label: "Store Performance", to: "/reports/stores", icon: "pi-building" },
       { label: "Accounts Sheet", to: "/reports/accounts-sheet", icon: "pi-calculator" },
-      { label: "Bank Accounts", to: "/settings/bank-accounts", icon: "pi-wallet", roles: ["ADMIN"] },
     ],
   },
   {
     title: "Stores",
-    roles: ["ADMIN"],
-    items: [{ label: "Stores", to: "/stores", icon: "pi-building-columns" }],
+    items: [
+      { label: "Stores", to: "/stores", icon: "pi-building-columns", roles: ["ADMIN"] },
+      { label: "Customers", to: "/customers", icon: "pi-users" },
+      { label: "Bank Accounts", to: "/settings/bank-accounts", icon: "pi-wallet", roles: ["ADMIN"] },
+    ],
   },
   {
     title: "Users",
