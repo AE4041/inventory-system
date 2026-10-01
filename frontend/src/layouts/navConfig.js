@@ -61,6 +61,7 @@ export const NAV_SECTIONS = [
     items: [
       { label: "Business Settings", to: "/settings", icon: "pi-cog" },
       { label: "MikroTik Integration", to: "/settings/mikrotik", icon: "pi-wifi" },
+      { label: "Bank Accounts", to: "/settings/bank-accounts", icon: "pi-wallet" },
     ],
   },
 ];

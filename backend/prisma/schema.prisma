@@ -70,6 +70,7 @@ model Organization {
   categories             Category[]
   expenseCategories      ExpenseCategory[]
   voucherProfileMappings VoucherProfileMapping[]
+  bankAccounts           BankAccount[]
 }
 
 // ---------- Users & Access ----------
@@ -93,6 +94,7 @@ model User {
   sales                Sale[]
   expensesRecorded      Expense[]
   manualSaleEntries     ManualSaleEntry[]
+  bankTransactions      BankTransaction[]
 
   @@index([organizationId])
 }
@@ -468,4 +470,56 @@ model VoucherRedemption {
   @@unique([storeId, voucherCode])
   @@index([storeId, productId, saleId])
   @@index([redeemedAt])
+}
+
+// ---------- Bank Accounts ----------
+// Admin-only cash-flow tracking, separate from the per-store Accounts Sheet report — one
+// business-wide ledger per bank account the organization holds. `balance` is a stored
+// running total (mirrors Store Product.quantity), kept in sync atomically with every
+// BankTransaction the same way applyInventoryChange keeps stock in sync with
+// InventoryTransaction — never patched directly.
+
+enum BankTransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  SERVICE_CHARGE
+}
+
+model BankAccount {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  name          String
+  bankName      String?
+  accountNumber String?
+  balance       Decimal  @default(0) @db.Decimal(12, 2)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  transactions BankTransaction[]
+
+  @@index([organizationId])
+}
+
+model BankTransaction {
+  id            String @id @default(cuid())
+  bankAccountId String
+  userId        String
+
+  bankAccount BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id])
+
+  type            BankTransactionType
+  amount          Decimal             @db.Decimal(12, 2)
+  previousBalance Decimal             @db.Decimal(12, 2)
+  newBalance      Decimal             @db.Decimal(12, 2)
+  date            DateTime
+  description     String?
+
+  createdAt DateTime @default(now())
+
+  @@index([bankAccountId])
+  @@index([date])
 }

@@ -106,6 +106,15 @@ export const dashboardApi = {
   get: (params) => api.get("/dashboard", { params }),
 };
 
+export const bankAccountsApi = {
+  list: () => api.get("/bank-accounts"),
+  create: (data) => api.post("/bank-accounts", data),
+  update: (id, data) => api.patch(`/bank-accounts/${id}`, data),
+  listTransactions: (id, params) => api.get(`/bank-accounts/${id}/transactions`, { params }),
+  addTransaction: (id, data) => api.post(`/bank-accounts/${id}/transactions`, data),
+  removeTransaction: (transactionId) => api.delete(`/bank-accounts/transactions/${transactionId}`),
+};
+
 export const reportsApi = {
   sales: (params) => api.get("/reports/sales", { params }),
   expenses: (params) => api.get("/reports/expenses", { params }),

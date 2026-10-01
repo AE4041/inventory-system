@@ -139,3 +139,18 @@ export const manualSaleEntrySchema = z.object({
   amount: z.coerce.number().positive(),
   date: z.coerce.date(),
 });
+
+export const bankAccountSchema = z.object({
+  name: z.string().min(2),
+  bankName: z.string().optional().nullable(),
+  accountNumber: z.string().optional().nullable(),
+  openingBalance: z.coerce.number().min(0).optional(),
+  active: z.boolean().optional(),
+});
+
+export const bankTransactionSchema = z.object({
+  type: z.enum(["DEPOSIT", "WITHDRAWAL", "SERVICE_CHARGE"]),
+  amount: z.coerce.number().positive(),
+  date: z.coerce.date(),
+  description: z.string().optional().nullable(),
+});

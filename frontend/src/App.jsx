@@ -29,6 +29,7 @@ import StoresPage from "./pages/stores/StoresPage";
 import UsersPage from "./pages/users/UsersPage";
 import SettingsPage from "./pages/settings/SettingsPage";
 import MikrotikIntegrationPage from "./pages/settings/MikrotikIntegrationPage";
+import BankAccountsPage from "./pages/settings/BankAccountsPage";
 
 function AuthenticatedShell() {
   return (
@@ -81,6 +82,7 @@ export default function App() {
               <Route path="users" element={<UsersPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="settings/mikrotik" element={<MikrotikIntegrationPage />} />
+              <Route path="settings/bank-accounts" element={<BankAccountsPage />} />
             </Route>
           </Route>
         </Route>

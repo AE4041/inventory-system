@@ -18,6 +18,7 @@ import customerRoutes from "./routes/customers.routes.js";
 import saleRoutes from "./routes/sales.routes.js";
 import expenseCategoryRoutes from "./routes/expenseCategories.routes.js";
 import expenseRoutes from "./routes/expenses.routes.js";
+import bankAccountRoutes from "./routes/bankAccounts.routes.js";
 import reportRoutes from "./routes/reports.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import receiptRoutes from "./routes/receipts.routes.js";
@@ -65,6 +66,7 @@ export function createApp() {
   app.use("/api/sales", saleRoutes);
   app.use("/api/expense-categories", expenseCategoryRoutes);
   app.use("/api/expenses", expenseRoutes);
+  app.use("/api/bank-accounts", bankAccountRoutes);
   app.use("/api/reports", reportRoutes);
   app.use("/api/dashboard", dashboardRoutes);
   app.use("/api/receipts", receiptRoutes);
