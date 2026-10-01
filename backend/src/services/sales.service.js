@@ -194,12 +194,18 @@ export async function cancelSale({ organizationId, saleId, userId, reason }) {
 // Pure bookkeeping flip — every sale (POS or MikroTik) is created as DRAFT so an admin
 // can review it before it counts as finalized revenue. Stock already moved at creation
 // time (or at voucher-redemption time for MikroTik), so there's nothing to reconcile here.
-export async function markSalePaid({ organizationId, saleId }) {
+export async function markSalePaid({ organizationId, saleId, paidAt }) {
   const sale = await prisma.sale.findFirst({ where: { id: saleId, store: { organizationId } } });
   if (!sale) throw ApiError.notFound("Sale not found");
   if (sale.status !== "DRAFT") throw ApiError.badRequest("Only draft sales can be marked as paid");
 
-  return prisma.sale.update({ where: { id: sale.id }, data: { status: "PAID", paidAt: new Date() }, include: SALE_INCLUDE });
+  const resolvedPaidAt = paidAt ?? new Date();
+  if (paidAt) {
+    if (paidAt.getTime() > Date.now()) throw ApiError.badRequest("Paid date cannot be in the future");
+    if (paidAt.getTime() < sale.createdAt.getTime()) throw ApiError.badRequest("Paid date cannot be before the sale was created");
+  }
+
+  return prisma.sale.update({ where: { id: sale.id }, data: { status: "PAID", paidAt: resolvedPaidAt }, include: SALE_INCLUDE });
 }
 
 // Admin correction on a draft or paid invoice: `items` is the full desired line list

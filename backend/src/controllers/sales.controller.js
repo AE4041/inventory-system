@@ -122,7 +122,7 @@ export const markSalePaidHandler = asyncHandler(async (req, res) => {
   if (!existing) throw ApiError.notFound("Sale not found");
   assertStoreAccess(req.user, existing.storeId);
 
-  const sale = await markSalePaid({ organizationId: req.user.organizationId, saleId: req.params.id });
+  const sale = await markSalePaid({ organizationId: req.user.organizationId, saleId: req.params.id, paidAt: req.body?.paidAt });
   res.json({ success: true, data: sale });
 });
 

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authenticate, authorize } from "../middleware/auth.js";
 import { validateBody } from "../middleware/validate.js";
-import { createSaleSchema, updateSaleItemsSchema } from "../utils/schemas.js";
+import { createSaleSchema, updateSaleItemsSchema, markPaidSchema } from "../utils/schemas.js";
 import {
   listSales,
   getSale,
@@ -21,7 +21,7 @@ router.get("/:id", getSale);
 router.post("/", validateBody(createSaleSchema), createSaleHandler);
 router.post("/:id/refund", authorize("ADMIN", "MANAGER"), refundSaleHandler);
 router.post("/:id/cancel", authorize("ADMIN", "MANAGER"), cancelSaleHandler);
-router.post("/:id/mark-paid", authorize("ADMIN", "MANAGER"), markSalePaidHandler);
+router.post("/:id/mark-paid", authorize("ADMIN", "MANAGER"), validateBody(markPaidSchema), markSalePaidHandler);
 router.patch("/:id/items", authorize("ADMIN"), validateBody(updateSaleItemsSchema), updateSaleItemsHandler);
 
 export default router;

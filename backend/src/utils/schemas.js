@@ -129,6 +129,10 @@ export const expenseSchema = z.object({
   notes: z.string().optional().nullable(),
 });
 
+export const markPaidSchema = z.object({
+  paidAt: z.coerce.date().optional(),
+});
+
 export const manualSaleEntrySchema = z.object({
   storeId: z.string(),
   description: z.string().min(1),

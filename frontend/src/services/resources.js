@@ -84,7 +84,7 @@ export const salesApi = {
   create: (data) => api.post("/sales", data),
   refund: (id, data) => api.post(`/sales/${id}/refund`, data),
   cancel: (id, data) => api.post(`/sales/${id}/cancel`, data),
-  markPaid: (id) => api.post(`/sales/${id}/mark-paid`),
+  markPaid: (id, data) => api.post(`/sales/${id}/mark-paid`, data),
   updateItems: (id, data) => api.patch(`/sales/${id}/items`, data),
 };
 

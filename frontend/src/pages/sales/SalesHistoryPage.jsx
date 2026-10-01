@@ -7,6 +7,7 @@ import { confirmDialog } from "@/components/ui-compat/confirmDialog";
 import { ConfirmDialog } from "@/components/ui-compat/confirmDialog";
 import { InputTextarea } from "@/components/ui-compat/InputTextarea";
 import { Dialog } from "@/components/ui-compat/Dialog";
+import { DatePicker as Calendar } from "@/components/ui-compat/DatePicker";
 import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
 import DateRangeFilter from "../../components/DateRangeFilter";
@@ -64,8 +65,9 @@ export default function SalesHistoryPage({ fixedStatus }) {
   const [loading, setLoading] = useState(false);
   const [viewingSale, setViewingSale] = useState(null);
   const [editingSale, setEditingSale] = useState(null);
-  const [actionDialog, setActionDialog] = useState(null); // { sale, type: 'refund' | 'cancel' }
+  const [actionDialog, setActionDialog] = useState(null); // { sale, type: 'refund' | 'cancel' | 'markPaid' }
   const [reason, setReason] = useState("");
+  const [paidAtDate, setPaidAtDate] = useState(new Date());
 
   function load() {
     if (!isRangeReady(range)) return;
@@ -88,14 +90,9 @@ export default function SalesHistoryPage({ fixedStatus }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [range, status, paymentMethod, currentStoreId, page]);
 
-  async function handleMarkPaid(sale) {
-    try {
-      await salesApi.markPaid(sale.id);
-      toast.success(`${sale.receiptNumber} marked as paid`);
-      load();
-    } catch (err) {
-      toast.error(apiErrorMessage(err, "Could not mark as paid"));
-    }
+  function openMarkPaidDialog(sale) {
+    setPaidAtDate(new Date());
+    setActionDialog({ sale, type: "markPaid" });
   }
 
   async function submitAction() {
@@ -103,15 +100,18 @@ export default function SalesHistoryPage({ fixedStatus }) {
       if (actionDialog.type === "refund") {
         await salesApi.refund(actionDialog.sale.id, { reason });
         toast.success("Sale refunded and stock restored");
-      } else {
+      } else if (actionDialog.type === "cancel") {
         await salesApi.cancel(actionDialog.sale.id, { reason });
         toast.success("Sale cancelled and stock restored");
+      } else {
+        await salesApi.markPaid(actionDialog.sale.id, { paidAt: paidAtDate });
+        toast.success(`${actionDialog.sale.receiptNumber} marked as paid`);
       }
       setActionDialog(null);
       setReason("");
       load();
     } catch (err) {
-      toast.error(apiErrorMessage(err, "Action failed"));
+      toast.error(apiErrorMessage(err, actionDialog.type === "markPaid" ? "Could not mark as paid" : "Action failed"));
     }
   }
 
@@ -156,7 +156,7 @@ export default function SalesHistoryPage({ fixedStatus }) {
               <div className="flex gap-1">
                 <Button icon="pi pi-receipt" text rounded onClick={() => setViewingSale(s)} tooltip="View receipt" />
                 {canManage && s.status === "DRAFT" && (
-                  <Button icon="pi pi-check" text rounded severity="success" tooltip="Mark as Paid" onClick={() => handleMarkPaid(s)} />
+                  <Button icon="pi pi-check" text rounded severity="success" tooltip="Mark as Paid" onClick={() => openMarkPaidDialog(s)} />
                 )}
                 {isAdmin && (s.status === "DRAFT" || (s.status === "PAID" && withinWindow(s, EDIT_REFUND_WINDOW_MS))) && (
                   <Button icon="pi pi-pencil" text rounded tooltip="Edit items" onClick={() => setEditingSale(s)} />
@@ -214,10 +214,35 @@ export default function SalesHistoryPage({ fixedStatus }) {
         }}
       />
 
-      <Dialog header={actionDialog?.type === "refund" ? "Refund Sale" : "Cancel Sale"} visible={!!actionDialog} onHide={() => setActionDialog(null)} style={{ width: "24rem" }}>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Optional reason (visible in inventory history)</p>
-        <InputTextarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} className="w-full mb-3" />
-        <Button label="Confirm" className="w-full" severity={actionDialog?.type === "refund" ? "warning" : "danger"} onClick={submitAction} />
+      <Dialog
+        header={actionDialog?.type === "refund" ? "Refund Sale" : actionDialog?.type === "cancel" ? "Cancel Sale" : "Mark as Paid"}
+        visible={!!actionDialog}
+        onHide={() => setActionDialog(null)}
+        style={{ width: "24rem" }}
+      >
+        {actionDialog?.type === "markPaid" ? (
+          <>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Date the payment was actually received</p>
+            <Calendar value={paidAtDate} onChange={(e) => setPaidAtDate(e.value)} dateFormat="M d, yy" showIcon className="w-full mb-1" />
+            {/* The date field's own text can render blank until it's clicked (a display-only
+                quirk in the underlying date-picker library) even though the selected value is
+                already correct — this makes the actual value unambiguous regardless. */}
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+              Selected: <span className="font-medium text-gray-600 dark:text-gray-300">{paidAtDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+            </p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+              The 6-hour edit/refund window is measured from this date, not from today — backdating it may leave the invoice already
+              outside that window.
+            </p>
+            <Button label="Confirm" className="w-full" severity="success" onClick={submitAction} />
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Optional reason (visible in inventory history)</p>
+            <InputTextarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} className="w-full mb-3" />
+            <Button label="Confirm" className="w-full" severity={actionDialog?.type === "refund" ? "warning" : "danger"} onClick={submitAction} />
+          </>
+        )}
       </Dialog>
     </div>
   );
