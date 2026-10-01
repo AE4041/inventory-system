@@ -4,6 +4,7 @@ import {
   listBankAccounts,
   createBankAccount,
   updateBankAccount,
+  deleteBankAccount,
   listBankTransactions,
   recordBankTransaction,
   deleteBankTransaction,
@@ -22,6 +23,11 @@ export const addBankAccount = asyncHandler(async (req, res) => {
 export const editBankAccount = asyncHandler(async (req, res) => {
   const account = await updateBankAccount({ organizationId: req.user.organizationId, accountId: req.params.id, ...req.body });
   res.json({ success: true, data: account });
+});
+
+export const removeBankAccount = asyncHandler(async (req, res) => {
+  const account = await deleteBankAccount({ organizationId: req.user.organizationId, accountId: req.params.id });
+  res.json({ success: true, data: { id: account.id } });
 });
 
 export const getBankTransactions = asyncHandler(async (req, res) => {

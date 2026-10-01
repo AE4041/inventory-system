@@ -6,6 +6,7 @@ import {
   getBankAccounts,
   addBankAccount,
   editBankAccount,
+  removeBankAccount,
   getBankTransactions,
   addBankTransaction,
   removeBankTransaction,
@@ -19,6 +20,7 @@ router.use(authenticate, authorize("ADMIN"));
 router.get("/", getBankAccounts);
 router.post("/", validateBody(bankAccountSchema), addBankAccount);
 router.patch("/:id", validateBody(bankAccountSchema.partial()), editBankAccount);
+router.delete("/:id", removeBankAccount);
 router.get("/:id/transactions", getBankTransactions);
 router.post("/:id/transactions", validateBody(bankTransactionSchema), addBankTransaction);
 router.delete("/transactions/:transactionId", removeBankTransaction);

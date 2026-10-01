@@ -39,6 +39,25 @@ export async function updateBankAccount({ organizationId, accountId, name, bankN
   return prisma.bankAccount.update({ where: { id: accountId }, data, select: ACCOUNT_SELECT });
 }
 
+// Only allowed once an account has no transaction history — BankTransaction cascades on
+// delete, so deleting an account with real activity would silently wipe its ledger. An
+// account that's actually been used should be deactivated (via updateBankAccount) instead,
+// same convention as Store's active toggle.
+export async function deleteBankAccount({ organizationId, accountId }) {
+  const existing = await prisma.bankAccount.findFirst({ where: { id: accountId, organizationId } });
+  if (!existing) throw ApiError.notFound("Bank account not found");
+
+  const transactionCount = await prisma.bankTransaction.count({ where: { bankAccountId: accountId } });
+  if (transactionCount > 0) {
+    throw ApiError.badRequest(
+      `This account has ${transactionCount} transaction${transactionCount === 1 ? "" : "s"} and can't be deleted — deactivate it instead to keep its history.`
+    );
+  }
+
+  await prisma.bankAccount.delete({ where: { id: accountId } });
+  return existing;
+}
+
 export async function listBankTransactions({ organizationId, accountId, skip, take }) {
   const account = await prisma.bankAccount.findFirst({ where: { id: accountId, organizationId } });
   if (!account) throw ApiError.notFound("Bank account not found");
